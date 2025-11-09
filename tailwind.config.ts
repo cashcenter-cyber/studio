@@ -100,11 +100,11 @@ export default {
         },
         'float': {
             '0%': { transform: 'translate(0px, 0px) rotate(0deg)' },
-            '15%': { transform: 'translate(20px, -15px) rotate(-8deg)' },
+            '15%': { transform: 'translate(-20px, -15px) rotate(-8deg)' },
             '30%': { transform: 'translate(-10px, 10px) rotate(5deg)' },
-            '45%': { transform: 'translate(15px, 25px) rotate(-12deg)' },
+            '45%': { transform: 'translate(-15px, -25px) rotate(-12deg)' },
             '60%': { transform: 'translate(-25px, -5px) rotate(10deg)' },
-            '75%': { transform: 'translate(10px, -20px) rotate(6deg)' },
+            '75%': { transform: 'translate(-10px, 20px) rotate(6deg)' },
             '100%': { transform: 'translate(0px, 0px) rotate(0deg)' },
         }
       },

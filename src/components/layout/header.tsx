@@ -22,11 +22,12 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { signOut } from 'firebase/auth';
-import { auth } from '@/lib/firebase/config';
+import { useAuthService } from '@/firebase';
 import { ThemeSwitcher } from './theme-switcher';
 
 export function Header() {
   const { user, userProfile, loading } = useAuth();
+  const auth = useAuthService();
 
   const handleSignOut = async () => {
     await signOut(auth);

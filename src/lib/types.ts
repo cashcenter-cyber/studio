@@ -16,10 +16,10 @@ export interface Transaction {
   id: string;
   userId: string;
   amount: number;
-  type: 'offer_completed' | 'payout' | 'bonus' | 'adjustment';
+  type: 'earn' | 'payout' | 'bonus' | 'adjustment';
   externalTransactionId?: string;
   description: string;
-  transactionDate: Timestamp;
+  createdAt: Timestamp;
   status: 'completed' | 'pending' | 'failed';
 }
 

@@ -5,12 +5,11 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithPopup,
 } from 'firebase/auth';
-import { auth } from '@/lib/firebase/config';
+import { initiateEmailSignIn, initiateEmailSignUp } from '@/firebase/non-blocking-login';
+import { useAuthService } from '@/firebase';
 import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
@@ -28,7 +27,7 @@ import { useToast } from '@/hooks/use-toast';
 import { createUserProfile } from '@/lib/firestore';
 import { Loader2 } from 'lucide-react';
 import { getDoc, doc } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
+import { useFirestore } from '@/firebase';
 
 
 const signUpSchema = z.object({
@@ -46,6 +45,8 @@ export function AuthForm() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
+  const auth = useAuthService();
+  const db = useFirestore();
 
   const handleAuthSuccess = () => {
     router.push('/dashboard');
@@ -93,16 +94,10 @@ export function AuthForm() {
       defaultValues: { email: '', password: '' },
     });
 
-    const onSubmit = async (values: z.infer<typeof loginSchema>) => {
+    const onSubmit = (values: z.infer<typeof loginSchema>) => {
       setLoading(true);
-      try {
-        await signInWithEmailAndPassword(auth, values.email, values.password);
-        handleAuthSuccess();
-      } catch (error) {
-        handleAuthError(error);
-      } finally {
-        setLoading(false);
-      }
+      initiateEmailSignIn(auth, values.email, values.password);
+      // Non-blocking, relying on AuthProvider's onAuthStateChanged
     };
 
     return (
@@ -129,7 +124,8 @@ export function AuthForm() {
       const onSubmit = async (values: z.infer<typeof signUpSchema>) => {
         setLoading(true);
         try {
-          const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+          // This part has to be blocking to ensure profile is created before redirect
+          const userCredential = await auth.createUserWithEmailAndPassword(values.email, values.password);
           await createUserProfile(userCredential.user, values.username);
           handleAuthSuccess();
         } catch (error) {

@@ -9,12 +9,11 @@ export function Footer() {
           <div>
             <Link href="/" className="inline-flex items-center gap-2 mb-4">
               <Image
-                src="https://picsum.photos/seed/logo/40/40"
+                src="/logo.png"
                 alt="Cash-Center Logo"
                 width={40}
                 height={40}
                 className="rounded-full"
-                data-ai-hint="logo"
               />
               <span className="font-bold text-lg text-white">
                 CASH<span className="text-primary">CENTER</span>

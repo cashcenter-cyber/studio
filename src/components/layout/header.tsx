@@ -57,12 +57,11 @@ export function Header() {
         <div className="flex items-center gap-4">
           <Link href="/" className="flex items-center gap-2">
             <Image
-              src="https://picsum.photos/seed/logo/40/40"
+              src="/logo.png"
               alt="Cash-Center Logo"
               width={40}
               height={40}
               className="rounded-full animate-glow"
-              data-ai-hint="logo"
             />
             <span className="font-bold text-xl text-white">
               CASH<span className="text-primary">CENTER</span>

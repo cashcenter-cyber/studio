@@ -39,7 +39,7 @@ const AnimatedBackground = () => {
         y: Math.random() * canvas.height,
         vx: (Math.random() - 0.5) * 0.3,
         vy: (Math.random() - 0.5) * 0.3,
-        radius: Math.random() * 2.0 + 1.0,
+        radius: isDark ? Math.random() * 2.0 + 1.0 : Math.random() * 2.5 + 1.5,
       });
     }
 
@@ -59,9 +59,20 @@ const AnimatedBackground = () => {
 
             ctx.beginPath();
             ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
-            const starColor = isDark ? `rgba(0, 255, 255, ${Math.random() * 0.5 + 0.3})` : `rgba(0, 0, 0, ${Math.random() * 0.5 + 0.4})`;
-            ctx.fillStyle = starColor;
+            
+            if (isDark) {
+                const starColor = `rgba(0, 255, 255, ${Math.random() * 0.5 + 0.3})`;
+                ctx.fillStyle = starColor;
+            } else {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+                ctx.shadowBlur = 5;
+            }
+            
             ctx.fill();
+
+            // Reset shadow for lines
+            ctx.shadowBlur = 0;
 
             for (let j = i + 1; j < stars.length; j++) {
                 const otherStar = stars[j];
@@ -74,7 +85,7 @@ const AnimatedBackground = () => {
                     ctx.moveTo(star.x, star.y);
                     ctx.lineTo(otherStar.x, otherStar.y);
                     ctx.strokeStyle = lineColor;
-                    ctx.lineWidth = 0.3;
+                    ctx.lineWidth = isDark ? 0.3 : 0.4;
                     ctx.stroke();
                 }
             }

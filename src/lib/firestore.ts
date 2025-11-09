@@ -1,19 +1,19 @@
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, Firestore } from 'firebase/firestore';
 import type { User } from 'firebase/auth';
-import { db } from './firebase/config';
 import type { UserProfile } from './types';
 
-export const createUserProfile = async (userAuth: User, username: string | null = null) => {
+export const createUserProfile = async (db: Firestore, userAuth: User, username: string | null = null) => {
   if (!userAuth) return;
 
   const userRef = doc(db, 'users', userAuth.uid);
 
+  // Ensure role is explicitly set for all new users.
   const newUserProfile: Omit<UserProfile, 'uid'> = {
     email: userAuth.email,
     username: username || userAuth.displayName,
     currentBalance: 0,
     lifetimeEarnings: 0,
-    role: 'user',
+    role: 'user', // Explicitly set role
     joinDate: serverTimestamp() as any,
     status: 'active',
   };
@@ -22,5 +22,6 @@ export const createUserProfile = async (userAuth: User, username: string | null 
     await setDoc(userRef, newUserProfile);
   } catch (error) {
     console.error('Error creating user profile in Firestore:', error);
+    // Note: In a real app, you would want to handle this more gracefully.
   }
 };

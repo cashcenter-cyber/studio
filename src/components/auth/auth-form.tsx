@@ -7,8 +7,9 @@ import * as z from 'zod';
 import {
   GoogleAuthProvider,
   signInWithPopup,
+  createUserWithEmailAndPassword,
 } from 'firebase/auth';
-import { initiateEmailSignIn, initiateEmailSignUp } from '@/firebase/non-blocking-login';
+import { initiateEmailSignIn } from '@/firebase/non-blocking-login';
 import { useAuthService } from '@/firebase';
 import { useRouter } from 'next/navigation';
 
@@ -77,7 +78,7 @@ export function AuthForm() {
 
       if (!userDoc.exists()) {
         // This is a new user, create their profile
-        await createUserProfile(user);
+        await createUserProfile(db, user);
       }
       
       handleAuthSuccess();
@@ -125,10 +126,10 @@ export function AuthForm() {
         setLoading(true);
         try {
           // This part has to be blocking to ensure profile is created before redirect
-          const userCredential = await auth.createUserWithEmailAndPassword(values.email, values.password);
-          await createUserProfile(userCredential.user, values.username);
+          const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+          await createUserProfile(db, userCredential.user, values.username);
           handleAuthSuccess();
-        } catch (error) {
+        } catch (error: any) {
           handleAuthError(error);
         } finally {
           setLoading(false);

@@ -1,34 +1,14 @@
 import { DollarSign, Users, CheckCircle, Gift } from 'lucide-react';
 import { GlassCard, CardContent, CardHeader, CardTitle } from '@/components/ui/glass-card';
 
-const stats = [
-    {
-        icon: DollarSign,
-        label: 'Total Paid Out',
-        value: '$1,234,567',
-        description: 'in cash and prizes'
-    },
-    {
-        icon: Users,
-        label: 'Happy Members',
-        value: '250,000+',
-        description: 'and growing daily'
-    },
-    {
-        icon: CheckCircle,
-        label: 'Offers Completed',
-        value: '3.5 Million',
-        description: 'tasks finished by our users'
-    },
-    {
-        icon: Gift,
-        label: 'Available Offers',
-        value: '1,500+',
-        description: 'from top brands'
-    }
-]
+type StatItem = {
+    icon: React.ElementType;
+    label: string;
+    value: string;
+    description: string;
+};
 
-export function Stats() {
+export function Stats({ stats }: { stats: StatItem[] }) {
     return (
         <section className="py-16">
              <h2 className="text-3xl font-bold font-headline text-center mb-8">Our Impact in Numbers</h2>

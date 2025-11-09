@@ -3,7 +3,12 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, Star, Users, DollarSign } from 'lucide-react';
 import { GlassCard, CardHeader } from '@/components/ui/glass-card';
 
-export function Hero() {
+interface HeroProps {
+    activeUsers: string;
+    rewardsPaid: string;
+}
+
+export function Hero({ activeUsers, rewardsPaid }: HeroProps) {
   return (
     <section className="container mx-auto px-4 py-20 md:py-28">
       <div className="grid md:grid-cols-2 gap-12 items-center">
@@ -39,7 +44,7 @@ export function Hero() {
                 <CardHeader className="flex flex-row items-center gap-4 space-y-0">
                     <Users className="h-10 w-10 text-primary" />
                     <div>
-                        <p className="font-headline text-4xl font-bold">12 500</p>
+                        <p className="font-headline text-4xl font-bold">{activeUsers}</p>
                         <p className="text-sm text-muted-foreground">Active Users</p>
                     </div>
                 </CardHeader>
@@ -48,7 +53,7 @@ export function Hero() {
                  <CardHeader className="flex flex-row items-center gap-4 space-y-0">
                     <DollarSign className="h-10 w-10 text-primary" />
                     <div>
-                        <p className="font-headline text-4xl font-bold">$2.5M</p>
+                        <p className="font-headline text-4xl font-bold">{rewardsPaid}</p>
                         <p className="text-sm text-muted-foreground">Rewards Paid</p>
                     </div>
                 </CardHeader>

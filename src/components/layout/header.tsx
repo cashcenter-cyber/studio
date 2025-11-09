@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import {
   LogOut,
   LayoutDashboard,
@@ -53,8 +52,8 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-background/80 backdrop-blur">
       <div className="container flex h-20 items-center">
-        <Link href="/" className="mr-6 flex items-center space-x-2">
-          <Image src="/logo.png" alt="Cash Center Logo" width={180} height={40} />
+        <Link href="/">
+          <img src="/logo.png" alt="Cash Center Logo" style={{ width: '180px', height: 'auto' }} className="mr-6"/>
         </Link>
         <nav className="hidden md:flex items-center space-x-6 text-sm font-medium text-gray-300">
           {navItems.map((item) =>

@@ -4,6 +4,8 @@ import { cn } from '@/lib/utils';
 import { AuthProvider } from '@/context/auth-provider';
 import { Toaster } from '@/components/ui/toaster';
 import './globals.css';
+import { ThemeProvider } from '@/context/theme-provider';
+import AnimatedBackground from '@/components/layout/animated-background';
 
 const fontBody = Inter({
   subsets: ['latin'],
@@ -34,10 +36,20 @@ export default function RootLayout({
           fontHeadline.variable
         )}
       >
-        <AuthProvider>
-          {children}
-          <Toaster />
-        </AuthProvider>
+        <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange
+        >
+          <AuthProvider>
+            <AnimatedBackground />
+            <div className="relative z-10">
+              {children}
+            </div>
+            <Toaster />
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

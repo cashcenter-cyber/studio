@@ -27,6 +27,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { createUserProfile } from '@/lib/firestore';
 import { Loader2 } from 'lucide-react';
+import { getDoc, doc } from 'firebase/firestore';
+import { db } from '@/lib/firebase/config';
+
 
 const signUpSchema = z.object({
   username: z.string().min(3, { message: 'Username must be at least 3 characters.' }),
@@ -65,10 +68,17 @@ export function AuthForm() {
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
-      // Check if this is a new user
-      if (result.user.metadata.creationTime === result.user.metadata.lastSignInTime) {
-        await createUserProfile(result.user);
+      const user = result.user;
+
+      // Check if the user document already exists in Firestore
+      const userDocRef = doc(db, 'users', user.uid);
+      const userDoc = await getDoc(userDocRef);
+
+      if (!userDoc.exists()) {
+        // This is a new user, create their profile
+        await createUserProfile(user);
       }
+      
       handleAuthSuccess();
     } catch (error) {
       handleAuthError(error);
@@ -151,12 +161,12 @@ export function AuthForm() {
     <div className="space-y-6">
        <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={loading}>
         {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512"><path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 126 23.4 172.9 61.5l-62.7 62.7C337 97 294.6 80 248 80c-82.8 0-150.4 66.6-150.4 148.4s67.6 148.4 150.4 148.4c97.1 0 134-63.5 138.3-95.3H248v-70.7h235.5c4.3 23.7 6.5 47.8 6.5 72.7z"></path></svg>}
-        Continue with Google
+        Continuer avec Google
       </Button>
 
       <div className="relative">
         <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-border" /></div>
-        <div className="relative flex justify-center text-xs uppercase"><span className="bg-card px-2 text-muted-foreground">Or continue with</span></div>
+        <div className="relative flex justify-center text-xs uppercase"><span className="bg-card px-2 text-muted-foreground">Ou continuer avec</span></div>
       </div>
 
       <Tabs defaultValue="login" className="w-full">

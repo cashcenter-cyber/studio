@@ -97,12 +97,20 @@ export default {
         'glow': {
           '0%, 100%': { filter: 'drop-shadow(0 0 0.75rem hsl(var(--primary) / 0.5))' },
           '50%': { filter: 'drop-shadow(0 0 1.5rem hsl(var(--primary) / 0.8))' },
+        },
+        'float': {
+            '0%, 100%': { transform: 'translateY(0px) translateX(0px) rotate(0deg)' },
+            '25%': { transform: 'translateY(-15px) translateX(10px) rotate(-5deg)' },
+            '50%': { transform: 'translateY(5px) translateX(-10px) rotate(5deg)' },
+            '75%': { transform: 'translateY(-10px) translateX(15px) rotate(-2deg)' },
         }
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         'glow': 'glow 2.5s ease-in-out infinite',
+        'float': 'float 12s ease-in-out infinite',
+        'float-delay': 'float 15s ease-in-out infinite -5s',
       },
     },
   },

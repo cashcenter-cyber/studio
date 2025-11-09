@@ -2,6 +2,7 @@
 
 import { useTheme } from 'next-themes';
 import React, { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 
 const AnimatedBackground = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -112,11 +113,31 @@ const AnimatedBackground = () => {
   };
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="fixed top-0 left-0 w-full h-full pointer-events-none z-0 transition-opacity duration-500"
-      style={style}
-    />
+    <div className="fixed top-0 left-0 w-full h-full pointer-events-none z-0">
+        <canvas
+            ref={canvasRef}
+            className="absolute top-0 left-0 w-full h-full transition-opacity duration-500"
+            style={style}
+        />
+         {isDark && (
+            <>
+                <Image 
+                    src="/big_1.png" 
+                    alt="Floating element 1" 
+                    width={400} 
+                    height={400} 
+                    className="absolute top-[10%] left-[5%] w-64 h-64 opacity-20 animate-float"
+                />
+                <Image 
+                    src="/big_2.png" 
+                    alt="Floating element 2" 
+                    width={400} 
+                    height={400} 
+                    className="absolute bottom-[15%] right-[10%] w-80 h-80 opacity-20 animate-float-delay"
+                />
+            </>
+        )}
+    </div>
   );
 };
 

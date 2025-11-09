@@ -40,7 +40,7 @@ const AnimatedBackground = () => {
         y: Math.random() * canvas.height,
         vx: (Math.random() - 0.5) * 0.3,
         vy: (Math.random() - 0.5) * 0.3,
-        radius: isDark ? Math.random() * 2.5 + 1.5 : Math.random() * 3.0 + 2.0,
+        radius: isDark ? Math.random() * 4.0 + 2.5 : Math.random() * 4.5 + 3.0,
       });
     }
 
@@ -86,7 +86,7 @@ const AnimatedBackground = () => {
                     ctx.moveTo(star.x, star.y);
                     ctx.lineTo(otherStar.x, otherStar.y);
                     ctx.strokeStyle = lineColor;
-                    ctx.lineWidth = isDark ? 0.4 : 0.6;
+                    ctx.lineWidth = isDark ? 0.6 : 0.8;
                     ctx.stroke();
                 }
             }

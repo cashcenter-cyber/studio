@@ -8,13 +8,14 @@ export const createUserProfile = async (userAuth: User, username: string | null 
 
   const userRef = doc(db, 'users', userAuth.uid);
 
-  const newUserProfile: UserProfile = {
-    uid: userAuth.uid,
+  const newUserProfile: Omit<UserProfile, 'uid'> = {
     email: userAuth.email,
     username: username || userAuth.displayName,
     currentBalance: 0,
+    lifetimeEarnings: 0,
     role: 'user',
-    createdAt: serverTimestamp() as any,
+    joinDate: serverTimestamp() as any,
+    status: 'active',
   };
 
   try {

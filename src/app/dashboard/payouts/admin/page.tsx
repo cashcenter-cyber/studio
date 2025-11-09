@@ -1,18 +1,22 @@
-import { collection, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
+import { collection, getDocs, query, where, orderBy, limit, Timestamp } from 'firebase/firestore';
 import type { Payout } from '@/lib/types';
 import { PayoutTable } from '@/components/admin/payout-table';
 import { Badge } from '@/components/ui/badge';
 import { adminDb } from '@/lib/firebase/admin';
 
-// This is a server component, so we can fetch data directly.
-// In a real app, you would add role-based protection here.
 async function getPendingPayouts(): Promise<Payout[]> {
   const payoutsCol = collection(adminDb, 'payouts');
   const q = query(payoutsCol, where('status', '==', 'pending'), orderBy('requestedAt', 'asc'), limit(50));
   const snapshot = await getDocs(q);
   
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Payout));
+  return snapshot.docs.map(doc => {
+      const data = doc.data();
+      return { 
+          id: doc.id, 
+          ...data,
+          requestedAt: data.requestedAt,
+        } as Payout;
+  });
 }
 
 export default async function AdminPayoutsPage() {

@@ -30,7 +30,7 @@ export async function requestPayout(values: z.infer<typeof payoutSchema>) {
   try {
     const result = await adminDb.runTransaction(async (transaction) => {
         const userDoc = await transaction.get(userRef)
-        if (!userDoc.exists) {
+        if (!userDoc.exists()) {
             throw new Error("User does not exist.")
         }
         const userProfile = userDoc.data() as UserProfile;
@@ -42,7 +42,7 @@ export async function requestPayout(values: z.infer<typeof payoutSchema>) {
         transaction.update(userRef, { currentBalance: newBalance });
 
         const payoutRef = collection(adminDb, 'payouts');
-        const newPayout: Omit<Payout, 'id'> = {
+        const newPayout: Omit<Payout, 'id' | 'processedAt'> = {
             userId: currentUser.uid,
             username: userProfile.username,
             amount,
@@ -90,6 +90,7 @@ export async function processPayoutAction(payoutId: string, newStatus: 'approved
         });
         
         revalidatePath('/dashboard/payouts/admin');
+        revalidatePath('/dashboard/admin/users')
         return { success: true };
     } catch (error: any) {
         return { success: false, error: error.message };

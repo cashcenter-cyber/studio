@@ -16,16 +16,20 @@ import { formatDistanceToNow } from 'date-fns'
 import { Check, X, Loader2 } from 'lucide-react'
 import { processPayoutAction } from '@/lib/actions'
 import { useToast } from '@/hooks/use-toast'
+import { useAuth } from '@/hooks/use-auth'
 
 export function PayoutTable({ payouts }: { payouts: Payout[] }) {
     const [loading, setLoading] = useState<string | null>(null);
     const { toast } = useToast();
+    const { user } = useAuth();
 
     const handleProcess = async (payoutId: string, status: 'approved' | 'declined') => {
         setLoading(payoutId);
         const result = await processPayoutAction(payoutId, status);
         if (result.success) {
             toast({ title: 'Success', description: `Payout has been ${status}.`});
+             // Forcing a reload to see changes. A more robust solution would use state management.
+             window.location.reload();
         } else {
             toast({ variant: 'destructive', title: 'Error', description: result.error });
         }
@@ -57,7 +61,7 @@ export function PayoutTable({ payouts }: { payouts: Payout[] }) {
               <Badge variant="secondary">{payout.method}</Badge>
             </TableCell>
             <TableCell className="text-xs text-muted-foreground truncate max-w-xs">{payout.payoutAddress}</TableCell>
-            <TableCell>{formatDistanceToNow(payout.requestedAt.toDate(), { addSuffix: true })}</TableCell>
+            <TableCell>{payout.requestedAt ? formatDistanceToNow(payout.requestedAt.toDate(), { addSuffix: true }) : 'N/A'}</TableCell>
             <TableCell className="text-right space-x-2">
                 {loading === payout.id ? <Loader2 className="h-4 w-4 animate-spin inline-block" /> :
                 <>

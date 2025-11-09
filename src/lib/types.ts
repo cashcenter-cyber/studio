@@ -8,7 +8,7 @@ export interface UserProfile {
   lifetimeEarnings: number;
   role: 'user' | 'admin';
   profilePicture?: string;
-  joinDate: Timestamp;
+  joinDate: Timestamp | Date; // Can be Timestamp from Firestore or Date after parsing
   status: 'active' | 'suspended' | 'anonymized';
 }
 
@@ -28,11 +28,11 @@ export interface Payout {
   userId: string;
   username: string | null;
   amount: number;
-  method: 'paypal' | 'crypto' | 'giftcard';
+  method: string;
   payoutAddress: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
-  requestDate: Timestamp;
-  completionDate?: Timestamp;
+  status: 'pending' | 'approved' | 'declined';
+  requestedAt: Timestamp;
+  processedAt?: Timestamp;
 }
 
 export interface Point {

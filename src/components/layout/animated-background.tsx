@@ -85,7 +85,7 @@ const AnimatedBackground = () => {
                     ctx.moveTo(star.x, star.y);
                     ctx.lineTo(otherStar.x, otherStar.y);
                     ctx.strokeStyle = lineColor;
-                    ctx.lineWidth = isDark ? 0.3 : 0.4;
+                    ctx.lineWidth = isDark ? 0.4 : 0.6;
                     ctx.stroke();
                 }
             }

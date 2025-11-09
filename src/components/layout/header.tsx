@@ -1,7 +1,15 @@
 'use client';
 
 import Link from 'next/link';
-import { Rocket, LogOut, LayoutDashboard, LogIn } from 'lucide-react';
+import {
+  Rocket,
+  LogOut,
+  LayoutDashboard,
+  LogIn,
+  ChevronDown,
+  HelpCircle,
+  Users,
+} from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,6 +23,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase/config';
+import { cn } from '@/lib/utils';
 
 export function Header() {
   const { user, userProfile, loading } = useAuth();
@@ -23,32 +32,97 @@ export function Header() {
     await signOut(auth);
   };
 
+  const navItems = [
+    {
+      href: '#',
+      label: 'Leaderboards',
+      icon: ChevronDown,
+      isDropdown: true,
+    },
+    {
+      href: '#',
+      label: 'FAQ',
+      icon: HelpCircle,
+    },
+    {
+      href: '#',
+      label: 'Affiliate',
+      icon: Users,
+    },
+  ];
+
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-primary/10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center">
+    <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-background/80 backdrop-blur">
+      <div className="container flex h-20 items-center">
         <Link href="/" className="mr-6 flex items-center space-x-2">
-          <Rocket className="h-6 w-6 text-primary animate-glow" />
-          <span className="font-bold font-headline text-lg">Cash-Center.fun</span>
+          <div className="h-10 w-10 bg-gray-700 rounded-md flex items-center justify-center text-white font-bold">
+            C
+          </div>
+          <span className="font-bold font-headline text-xl tracking-wider">
+            CASHCENTER
+          </span>
         </Link>
+        <nav className="hidden md:flex items-center space-x-6 text-sm font-medium text-gray-300">
+          {navItems.map((item) =>
+            item.isDropdown ? (
+              <DropdownMenu key={item.label}>
+                <DropdownMenuTrigger className="flex items-center gap-1 hover:text-white transition-colors outline-none">
+                  {item.label}
+                  <item.icon className="h-4 w-4" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="glass-card">
+                  <DropdownMenuItem>Daily</DropdownMenuItem>
+                  <DropdownMenuItem>Weekly</DropdownMenuItem>
+                  <DropdownMenuItem>All Time</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Link
+                key={item.label}
+                href={item.href}
+                className="flex items-center gap-2 hover:text-white transition-colors"
+              >
+                <item.icon className="h-4 w-4" />
+                {item.label}
+              </Link>
+            )
+          )}
+        </nav>
         <div className="flex flex-1 items-center justify-end space-x-4">
-          <nav className="flex items-center space-x-2">
             {loading ? null : user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={user.photoURL ?? ''} alt={userProfile?.username ?? ''} />
+                  <Button
+                    variant="ghost"
+                    className="relative h-10 w-10 rounded-full"
+                  >
+                    <Avatar className="h-10 w-10 border-2 border-primary">
+                      <AvatarImage
+                        src={user.photoURL ?? ''}
+                        alt={userProfile?.username ?? ''}
+                      />
                       <AvatarFallback className="bg-primary text-primary-foreground">
-                        {userProfile?.username?.charAt(0).toUpperCase() ?? user.email?.charAt(0).toUpperCase()}
+                        {userProfile?.username
+                          ?.charAt(0)
+                          .toUpperCase() ??
+                          user.email?.charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 glass-card" align="end" forceMount>
+                <DropdownMenuContent
+                  className="w-56 glass-card"
+                  align="end"
+                  forceMount
+                >
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">{userProfile?.username ?? 'User'}</p>
-                      <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                      <p className="text-sm font-medium leading-none">
+                        {userProfile?.username ?? 'User'}
+                      </p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {user.email}
+                      </p>
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
@@ -66,14 +140,20 @@ export function Header() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button asChild>
-                <Link href="/auth">
-                  <LogIn className="mr-2 h-4 w-4"/>
-                  Login / Sign Up
-                </Link>
-              </Button>
+                <div className="flex items-center gap-2">
+                    <Button variant="outline" asChild>
+                        <Link href="/auth">
+                            Login
+                        </Link>
+                    </Button>
+                    <Button asChild>
+                        <Link href="/auth">
+                           Sign Up
+                        </Link>
+                    </Button>
+                </div>
+
             )}
-          </nav>
         </div>
       </div>
     </header>

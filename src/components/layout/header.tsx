@@ -8,6 +8,7 @@ import {
   ChevronDown,
   HelpCircle,
   Users,
+  Rocket
 } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
@@ -55,7 +56,7 @@ export function Header() {
       <div className="container flex h-20 items-center">
         <div className="flex items-center gap-4">
           <Link href="/" className="flex items-center gap-2">
-            <img src="/logo.png" alt="Cash Center Logo" style={{ height: '40px', width: 'auto' }} className="mr-2"/>
+            <Rocket className="h-8 w-8 text-primary animate-glow"/>
             <span className="font-bold text-xl text-white">
               CASH<span className="text-primary">CENTER</span>
             </span>

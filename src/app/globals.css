@@ -122,3 +122,9 @@
     @apply bg-card backdrop-blur-lg border rounded-xl shadow-lg;
   }
 }
+
+@layer utilities {
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite;
+  }
+}

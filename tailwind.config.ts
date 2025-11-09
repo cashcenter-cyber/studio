@@ -99,12 +99,8 @@ export default {
           '50%': { filter: 'drop-shadow(0 0 1.5rem hsl(var(--primary) / 0.8))' },
         },
         'float': {
-            '0%': { transform: 'translateX(100vw) translateY(0vh) rotate(0deg)' },
-            '20%': { transform: 'translateX(80vw) translateY(-15vh) rotate(-8deg)' },
-            '40%': { transform: 'translateX(40vw) translateY(10vh) rotate(5deg)' },
-            '60%': { transform: 'translateX(20vw) translateY(-25vh) rotate(-12deg)' },
-            '80%': { transform: 'translateX(0vw) translateY(5vh) rotate(10deg)' },
-            '100%': { transform: 'translateX(-100%) translateY(20vh) rotate(6deg)' },
+            '0%': { transform: 'translateX(100vw) rotate(0deg)' },
+            '100%': { transform: 'translateX(-100vw) rotate(20deg)' },
         }
       },
       animation: {

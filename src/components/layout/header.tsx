@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import {
-  Rocket,
   LogOut,
   LayoutDashboard,
   LogIn,
@@ -23,7 +23,6 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase/config';
-import { cn } from '@/lib/utils';
 
 export function Header() {
   const { user, userProfile, loading } = useAuth();
@@ -55,12 +54,7 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-background/80 backdrop-blur">
       <div className="container flex h-20 items-center">
         <Link href="/" className="mr-6 flex items-center space-x-2">
-          <div className="h-10 w-10 bg-gray-700 rounded-md flex items-center justify-center text-white font-bold">
-            C
-          </div>
-          <span className="font-bold font-headline text-xl tracking-wider">
-            CASHCENTER
-          </span>
+          <Image src="/logo.png" alt="Cash Center Logo" width={180} height={40} />
         </Link>
         <nav className="hidden md:flex items-center space-x-6 text-sm font-medium text-gray-300">
           {navItems.map((item) =>

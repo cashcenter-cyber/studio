@@ -3,17 +3,17 @@ import { GlassCard, CardContent } from '@/components/ui/glass-card';
 
 const steps = [
   {
-    image: '/s_step-1.png',
+    image: '/s_step_1.png',
     title: 'Sign Up',
     description: 'Create an account in just a few seconds and join our community.',
   },
   {
-    image: '/s_step-2.png',
+    image: '/s_step_2.png',
     title: 'Complete Offers',
     description: 'Choose from hundreds of surveys, apps, and tasks to complete.',
   },
   {
-    image: '/s_step-3.png',
+    image: '/s_step_3.png',
     title: 'Get Paid',
     description: 'Withdraw your earnings via PayPal, crypto, gift cards, and more.',
   },

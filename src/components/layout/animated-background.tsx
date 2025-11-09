@@ -153,7 +153,7 @@ const AnimatedBackground = () => {
   }, [isDark, mounted]);
   
   const style = {
-      opacity: !mounted ? 0 : (isDark ? 0.6 : 0.2)
+      opacity: !mounted ? 0 : (isDark ? 0.6 : 0.4)
   };
 
   return (

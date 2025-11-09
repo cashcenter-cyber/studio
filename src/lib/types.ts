@@ -5,18 +5,22 @@ export interface UserProfile {
   email: string | null;
   username: string | null;
   currentBalance: number;
+  lifetimeEarnings: number;
   role: 'user' | 'admin';
-  createdAt: Timestamp;
-  anonymized?: boolean;
+  profilePicture?: string;
+  joinDate: Timestamp;
+  status: 'active' | 'suspended' | 'anonymized';
 }
 
 export interface Transaction {
   id: string;
   userId: string;
   amount: number;
-  type: 'earn' | 'payout' | 'adjustment';
+  type: 'offer_completed' | 'payout' | 'bonus' | 'adjustment';
+  externalTransactionId?: string;
   description: string;
-  createdAt: Timestamp;
+  transactionDate: Timestamp;
+  status: 'completed' | 'pending' | 'failed';
 }
 
 export interface Payout {
@@ -24,9 +28,29 @@ export interface Payout {
   userId: string;
   username: string | null;
   amount: number;
-  method: string;
+  method: 'paypal' | 'crypto' | 'giftcard';
   payoutAddress: string;
-  status: 'pending' | 'approved' | 'declined';
-  requestedAt: Timestamp;
-  processedAt?: Timestamp;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  requestDate: Timestamp;
+  completionDate?: Timestamp;
+}
+
+export interface Point {
+    id: string;
+    userId: string;
+    pointsAmount: number;
+    pointsType: 'daily_streak' | 'level_up' | 'treasure' | 'spin';
+    earnDate: Timestamp;
+    expiryDate?: Timestamp;
+}
+
+export interface Offer {
+    id: string;
+    name: string;
+    description: string;
+    reward: number;
+    category: string;
+    partnerId: string;
+    status: 'active' | 'inactive';
+    externalId?: string;
 }

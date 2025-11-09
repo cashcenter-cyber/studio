@@ -1,5 +1,5 @@
 const payoutMethods = [
-  'PayPal', 'Bitcoin', 'Ethereum', 'Amazon', 'Steam', 'Visa'
+  'PayPal', 'Bitcoin', 'Ethereum', 'Amazon', 'Steam', 'Google Play', 'Roblox'
 ];
 
 export function PayoutLogos() {

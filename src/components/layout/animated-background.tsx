@@ -126,28 +126,28 @@ const AnimatedBackground = () => {
                     alt="Floating element 1" 
                     width={400} 
                     height={400} 
-                    className="absolute top-[10%] left-[5%] w-64 h-64 opacity-20 animate-float"
+                    className="absolute top-[10%] -right-full w-64 h-64 opacity-20 animate-float"
                 />
                 <Image 
                     src="/big_2.png" 
                     alt="Floating element 2" 
                     width={400} 
                     height={400} 
-                    className="absolute bottom-[15%] right-[10%] w-80 h-80 opacity-20 animate-float-delay"
+                    className="absolute bottom-[15%] -right-full w-80 h-80 opacity-20 animate-float-delay"
                 />
                  <Image 
                     src="/small_1.png" 
                     alt="Floating element 3" 
                     width={150} 
                     height={150} 
-                    className="absolute top-[50%] left-[25%] w-24 h-24 opacity-10 animate-float-fast"
+                    className="absolute top-[50%] -right-full w-24 h-24 opacity-10 animate-float-fast"
                 />
                 <Image 
                     src="/small_2.png" 
                     alt="Floating element 4" 
                     width={150} 
                     height={150} 
-                    className="absolute bottom-[30%] left-[15%] w-32 h-32 opacity-15 animate-float-slow"
+                    className="absolute bottom-[30%] -right-full w-32 h-32 opacity-15 animate-float-slow"
                 />
             </>
         )}

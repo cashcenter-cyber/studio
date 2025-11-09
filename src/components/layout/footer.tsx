@@ -1,7 +1,20 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import { InfoDialog } from './info-dialog';
 
 export function Footer() {
+  const companyLinks = [
+    { title: 'About', content: 'Cash-Center.fun is a platform dedicated to helping users earn money online through various activities.' },
+    { title: 'Business', content: 'For business inquiries, please contact us at business@cash-center.fun.' },
+    { title: 'Contact', content: 'You can reach our support team at support@cash-center.fun.' },
+  ];
+
+  const supportLinks = [
+    { title: 'FAQ', content: 'Find answers to frequently asked questions here. (Content coming soon)' },
+    { title: 'Help Center', content: 'Visit our help center for detailed guides. (Content coming soon)' },
+    { title: 'Contact Support', content: 'Contact our support team for any issues. (Content coming soon)' },
+  ];
+
   return (
     <footer className="w-full border-t border-white/10 bg-background/80 backdrop-blur">
       <div className="container mx-auto px-4 py-12">
@@ -27,10 +40,12 @@ export function Footer() {
           <div>
             <h3 className="font-bold text-white mb-4 uppercase tracking-wider">Company</h3>
             <ul className="space-y-3 text-gray-400">
-              <li><Link href="#" className="hover:text-primary transition-colors">About</Link></li>
-              <li><Link href="#" className="hover:text-primary transition-colors">Business</Link></li>
-              <li><Link href="#" className="hover:text-primary transition-colors">Contact</Link></li>
-              <li><Link href="#" className="hover:text-primary transition-colors">Affiliate</Link></li>
+              {companyLinks.map(link => (
+                <li key={link.title}>
+                  <InfoDialog title={link.title} content={link.content} />
+                </li>
+              ))}
+               <li><Link href="#" className="hover:text-primary transition-colors">Affiliate</Link></li>
             </ul>
           </div>
 
@@ -39,16 +54,20 @@ export function Footer() {
             <ul className="space-y-3 text-gray-400">
               <li><Link href="/terms" className="hover:text-primary transition-colors">Terms of Service</Link></li>
               <li><Link href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
-              <li><Link href="#" className="hover:text-primary transition-colors">Cookie Policy</Link></li>
+              <li>
+                <InfoDialog title="Cookie Policy" content="Our website uses cookies to enhance your experience. (Detailed content coming soon)" />
+              </li>
             </ul>
           </div>
 
           <div>
             <h3 className="font-bold text-white mb-4 uppercase tracking-wider">Support</h3>
             <ul className="space-y-3 text-gray-400">
-              <li><Link href="#" className="hover:text-primary transition-colors">FAQ</Link></li>
-              <li><Link href="#" className="hover:text-primary transition-colors">Help Center</Link></li>
-              <li><Link href="#" className="hover:text-primary transition-colors">Contact Support</Link></li>
+               {supportLinks.map(link => (
+                <li key={link.title}>
+                  <InfoDialog title={link.title} content={link.content} />
+                </li>
+              ))}
             </ul>
           </div>
         </div>

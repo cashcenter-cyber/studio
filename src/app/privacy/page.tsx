@@ -1,14 +1,23 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import { Footer } from '@/components/layout/footer';
 import { Header } from '@/components/layout/header';
 
 export default function PrivacyPage() {
+    const [currentDate, setCurrentDate] = useState('');
+
+    useEffect(() => {
+        setCurrentDate(new Date().toLocaleDateString());
+    }, []);
+
     return (
         <div className="flex min-h-screen flex-col">
             <Header />
             <main className="flex-1 container mx-auto px-4 py-12">
                 <div className="prose prose-invert max-w-4xl mx-auto">
                 <h1 className="font-headline text-4xl text-primary">Privacy Policy</h1>
-                <p className="lead">Last updated: {new Date().toLocaleDateString()}</p>
+                <p className="lead">Last updated: {currentDate}</p>
                 
                 <p>Welcome to Cash-Center.fun. We are committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website.</p>
 

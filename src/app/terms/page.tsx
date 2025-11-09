@@ -1,14 +1,23 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import { Footer } from '@/components/layout/footer';
 import { Header } from '@/components/layout/header';
 
 export default function TermsPage() {
+    const [currentDate, setCurrentDate] = useState('');
+
+    useEffect(() => {
+        setCurrentDate(new Date().toLocaleDateString());
+    }, []);
+
     return (
         <div className="flex min-h-screen flex-col">
             <Header />
             <main className="flex-1 container mx-auto px-4 py-12">
                 <div className="prose prose-invert max-w-4xl mx-auto">
                     <h1 className="font-headline text-4xl text-primary">Terms of Service</h1>
-                    <p className="lead">Last updated: {new Date().toLocaleDateString()}</p>
+                    <p className="lead">Last updated: {currentDate}</p>
 
                     <h2>1. Agreement to Terms</h2>
                     <p>By using our services, you agree to be bound by these Terms of Service. If you do not agree to these terms, do not use the services.</p>

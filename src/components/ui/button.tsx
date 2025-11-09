@@ -9,7 +9,7 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0_15px_rgba(var(--primary-rgb),0.4)]",
+        default: "bg-primary text-primary-foreground hover:bg-primary/90",
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90",
         outline:
@@ -42,14 +42,9 @@ export interface ButtonProps
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : "button"
-
-    // Convert HSL to RGB for the shadow color
-    const primaryRgb = '26, 232, 232'; // Pre-calculated from HSL 180, 100%, 50%
-
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
-        style={{ '--primary-rgb': primaryRgb } as React.CSSProperties}
         ref={ref}
         {...props}
       />

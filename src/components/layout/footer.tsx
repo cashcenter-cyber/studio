@@ -6,8 +6,9 @@ export function Footer() {
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-5 gap-8 text-sm">
           <div className="col-span-2">
-            <Link href="/" className="inline-block mb-2">
-              <img src="/logo.png" alt="Cash Center Logo" style={{ width: '180px', height: 'auto' }} />
+            <Link href="/" className="inline-flex items-center gap-2 mb-2">
+              <img src="/logo.png" alt="Cash Center Logo" style={{ width: '32px', height: 'auto' }} />
+              <span className="font-bold text-white">CASH CENTER</span>
             </Link>
             <p className="text-gray-400">Earn money online with the best earning platform.</p>
           </div>
@@ -43,8 +44,8 @@ export function Footer() {
 
         <div className="mt-8 pt-8 border-t border-white/10 flex justify-between items-center text-xs text-gray-500">
           <p>© {new Date().getFullYear()} Cash-Center.fun. All rights reserved.</p>
-          <div className="flex items-center gap-2">
-            <span>b</span>
+          <div className="flex items-center gap-2 bg-white text-black px-2 py-1 rounded">
+            <span className="font-bold">b</span>
             <span>Made in Bolt</span>
           </div>
         </div>

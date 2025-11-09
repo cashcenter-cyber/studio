@@ -1,8 +1,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Star, Users, DollarSign } from 'lucide-react';
-import { GlassCard, CardContent, CardHeader } from '@/components/ui/glass-card';
-
+import { GlassCard, CardHeader } from '@/components/ui/glass-card';
 
 export function Hero() {
   return (
@@ -15,19 +14,19 @@ export function Hero() {
             </div>
 
             <h1 className="font-headline text-5xl font-bold tracking-tight sm:text-6xl md:text-7xl">
-                Earn Money Online <br/>
-                <span className="text-primary">Today!</span>
+                Earn <span className="text-primary">Money Online</span> <br/>
+                Today!
             </h1>
             <p className="mt-6 max-w-xl text-lg text-gray-300">
                 Complete surveys, test apps, and earn real money. Cash out via PayPal, crypto, or gift cards.
             </p>
             <div className="mt-8 flex gap-4">
-            <Button asChild size="lg" className="font-bold text-lg">
+            <Button asChild size="lg">
                 <Link href="/auth">
                 Start Earning <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
             </Button>
-            <Button asChild size="lg" variant="outline" className="font-bold text-lg">
+            <Button asChild size="lg" variant="outline">
                 <Link href="#">
                     Learn More
                 </Link>
@@ -36,7 +35,7 @@ export function Hero() {
         </div>
 
         <div className="space-y-6">
-            <GlassCard className="p-2">
+            <GlassCard className="p-4">
                 <CardHeader className="flex flex-row items-center gap-4 space-y-0">
                     <Users className="h-10 w-10 text-primary" />
                     <div>
@@ -45,7 +44,7 @@ export function Hero() {
                     </div>
                 </CardHeader>
             </GlassCard>
-            <GlassCard className="p-2">
+            <GlassCard className="p-4">
                  <CardHeader className="flex flex-row items-center gap-4 space-y-0">
                     <DollarSign className="h-10 w-10 text-primary" />
                     <div>

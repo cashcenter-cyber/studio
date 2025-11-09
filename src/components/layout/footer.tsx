@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { DollarSign } from 'lucide-react';
+import Image from 'next/image';
 
 export function Footer() {
   return (
@@ -8,7 +8,14 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-sm">
           <div>
             <Link href="/" className="inline-flex items-center gap-2 mb-4">
-              <DollarSign className="h-8 w-8 text-primary" />
+              <Image
+                src="https://picsum.photos/seed/logo/40/40"
+                alt="Cash-Center Logo"
+                width={40}
+                height={40}
+                className="rounded-full"
+                data-ai-hint="logo"
+              />
               <span className="font-bold text-lg text-white">
                 CASH<span className="text-primary">CENTER</span>
               </span>

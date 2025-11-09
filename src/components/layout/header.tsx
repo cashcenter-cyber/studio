@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   LogOut,
   LayoutDashboard,
@@ -8,7 +9,6 @@ import {
   ChevronDown,
   HelpCircle,
   Users,
-  DollarSign
 } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
@@ -56,7 +56,14 @@ export function Header() {
       <div className="container flex h-20 items-center">
         <div className="flex items-center gap-4">
           <Link href="/" className="flex items-center gap-2">
-            <DollarSign className="h-8 w-8 text-primary animate-glow"/>
+            <Image
+              src="https://picsum.photos/seed/logo/40/40"
+              alt="Cash-Center Logo"
+              width={40}
+              height={40}
+              className="rounded-full animate-glow"
+              data-ai-hint="logo"
+            />
             <span className="font-bold text-xl text-white">
               CASH<span className="text-primary">CENTER</span>
             </span>

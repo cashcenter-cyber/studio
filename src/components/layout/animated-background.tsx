@@ -39,7 +39,7 @@ const AnimatedBackground = () => {
         y: Math.random() * canvas.height,
         vx: (Math.random() - 0.5) * 0.3,
         vy: (Math.random() - 0.5) * 0.3,
-        radius: Math.random() * 1.5 + 0.5,
+        radius: Math.random() * 2.0 + 1.0,
       });
     }
 
@@ -48,7 +48,7 @@ const AnimatedBackground = () => {
         if (!ctx) return;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        const lineColor = isDark ? 'rgba(0, 255, 255, 0.08)' : 'rgba(0, 100, 0, 0.1)';
+        const lineColor = isDark ? 'rgba(0, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.1)';
 
         stars.forEach((star, i) => {
             star.x += star.vx;
@@ -59,7 +59,7 @@ const AnimatedBackground = () => {
 
             ctx.beginPath();
             ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
-            const starColor = isDark ? `rgba(0, 255, 255, ${Math.random() * 0.5 + 0.3})` : `rgba(0, 100, 0, ${Math.random() * 0.5 + 0.4})`;
+            const starColor = isDark ? `rgba(0, 255, 255, ${Math.random() * 0.5 + 0.3})` : `rgba(0, 0, 0, ${Math.random() * 0.5 + 0.4})`;
             ctx.fillStyle = starColor;
             ctx.fill();
 

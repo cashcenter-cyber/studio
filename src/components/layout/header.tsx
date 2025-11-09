@@ -22,6 +22,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase/config';
+import { ThemeSwitcher } from './theme-switcher';
 
 export function Header() {
   const { user, userProfile, loading } = useAuth();
@@ -51,14 +52,17 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-background/80 backdrop-blur">
-      <div className="container flex h-20 items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <img src="/logo.png" alt="Cash Center Logo" style={{ height: '40px', width: 'auto' }} className="mr-2"/>
-          <span className="font-bold text-lg text-white">
-            CASH<span className="text-primary">CENTER</span>
-          </span>
-        </Link>
-        <nav className="hidden md:flex items-center space-x-6 text-sm font-medium text-gray-300">
+      <div className="container flex h-20 items-center">
+        <div className="flex items-center gap-4">
+          <Link href="/" className="flex items-center gap-2">
+            <img src="/logo.png" alt="Cash Center Logo" style={{ height: '40px', width: 'auto' }} className="mr-2"/>
+            <span className="font-bold text-xl text-white">
+              CASH<span className="text-primary">CENTER</span>
+            </span>
+          </Link>
+          <ThemeSwitcher />
+        </div>
+        <nav className="hidden md:flex flex-1 items-center justify-center space-x-6 text-sm font-medium text-gray-300">
           {navItems.map((item) =>
             item.isDropdown ? (
               <DropdownMenu key={item.label}>

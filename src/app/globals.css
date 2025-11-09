@@ -3,12 +3,12 @@
 @tailwind utilities;
 
 .bg-galactic-network {
-  background-color: hsl(224, 71%, 4%);
+  background-color: hsl(var(--background));
   background-image:
-    radial-gradient(at 20% 20%, hsl(210, 40%, 15%) 0px, transparent 50%),
-    radial-gradient(at 80% 0%, hsl(180, 50%, 20%) 0px, transparent 50%),
-    radial-gradient(at 80% 80%, hsl(240, 50%, 30%) 0px, transparent 50%),
-    radial-gradient(at 10% 90%, hsl(220, 50%, 25%) 0px, transparent 50%);
+    radial-gradient(at 20% 20%, hsl(var(--accent) / 0.5) 0px, transparent 50%),
+    radial-gradient(at 80% 0%, hsl(var(--accent) / 0.6) 0px, transparent 50%),
+    radial-gradient(at 80% 80%, hsl(var(--accent) / 0.7) 0px, transparent 50%),
+    radial-gradient(at 10% 90%, hsl(var(--accent) / 0.8) 0px, transparent 50%);
   background-size: 100% 100%;
   background-repeat: no-repeat;
 }
@@ -63,9 +63,49 @@
   }
 
   .dark {
-    /* Variables are defined in :root for dark-first design */
+    /* Dark theme variables are defined in :root for a dark-first approach */
+  }
+
+  .light {
+    --background: 210 40% 98%; /* Light Gray */
+    --foreground: 224 71% 4%; /* Deep Blue */
+
+    --card: 0 0% 100% / 0.8;
+    --card-foreground: 224 71% 4%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 71% 4%;
+
+    --primary: 185 91% 51%; /* Cyan */
+    --primary-foreground: 224 71% 4%;
+
+    --secondary: 210 40% 90%;
+    --secondary-foreground: 224 71% 4%;
+
+    --muted: 210 40% 90%;
+    --muted-foreground: 0 0% 45%;
+
+    --accent: 210 40% 85%;
+    --accent-foreground: 224 71% 4%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 185 91% 51% / 0.3;
+    --input: 210 40% 90% / 0.8;
+    --ring: 185 91% 51%;
+    
+    --sidebar-background: 210 40% 96%;
+    --sidebar-foreground: 224 71% 4%;
+    --sidebar-primary: 185 91% 51%;
+    --sidebar-primary-foreground: 224 71% 4%;
+    --sidebar-accent: 210 40% 90%;
+    --sidebar-accent-foreground: 224 71% 4%;
+    --sidebar-border: 185 91% 51% / 0.2;
+    --sidebar-ring: 185 91% 51%;
   }
 }
+
 
 @layer base {
   * {

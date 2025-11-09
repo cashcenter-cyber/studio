@@ -135,4 +135,11 @@
   .animate-float-delay {
       animation: float 15s ease-in-out infinite -5s;
   }
+  .animate-float-fast {
+    animation: float 10s ease-in-out infinite -2s;
+  }
+
+  .animate-float-slow {
+      animation: float 18s ease-in-out infinite -8s;
+  }
 }

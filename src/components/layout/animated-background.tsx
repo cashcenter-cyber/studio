@@ -135,6 +135,20 @@ const AnimatedBackground = () => {
                     height={400} 
                     className="absolute bottom-[15%] right-[10%] w-80 h-80 opacity-20 animate-float-delay"
                 />
+                 <Image 
+                    src="/small_1.png" 
+                    alt="Floating element 3" 
+                    width={150} 
+                    height={150} 
+                    className="absolute top-[50%] left-[20%] w-24 h-24 opacity-10 animate-float-fast"
+                />
+                <Image 
+                    src="/small_2.png" 
+                    alt="Floating element 4" 
+                    width={150} 
+                    height={150} 
+                    className="absolute bottom-[30%] right-[35%] w-32 h-32 opacity-15 animate-float-slow"
+                />
             </>
         )}
     </div>

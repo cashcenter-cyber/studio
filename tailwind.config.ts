@@ -111,6 +111,8 @@ export default {
         'glow': 'glow 2.5s ease-in-out infinite',
         'float': 'float 12s ease-in-out infinite',
         'float-delay': 'float 15s ease-in-out infinite -5s',
+        'float-fast': 'float 10s ease-in-out infinite -2s',
+        'float-slow': 'float 18s ease-in-out infinite -8s',
       },
     },
   },

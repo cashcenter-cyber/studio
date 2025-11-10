@@ -9,6 +9,7 @@ import { DollarSign, Users, CheckCircle, Gift } from 'lucide-react';
 import { adminDb } from '@/lib/firebase/admin';
 import { collection, getDocs, query, where, getCountFromServer, collectionGroup } from 'firebase/firestore';
 
+export const dynamic = 'force-dynamic';
 
 async function getHomepageStats() {
     if (!adminDb) {

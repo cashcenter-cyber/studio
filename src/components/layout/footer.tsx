@@ -4,15 +4,22 @@ import { InfoDialog } from './info-dialog';
 
 export function Footer() {
   const companyLinks = [
-    { title: 'About', content: 'Cash-Center.fun is a platform dedicated to helping users earn money online through various activities.' },
-    { title: 'Business', content: 'For business inquiries, please contact us at business@cash-center.fun.' },
-    { title: 'Contact', content: 'You can reach our support team at support@cash-center.fun.' },
+    { title: 'About', content: 'Cash-Center.fun is a platform dedicated to helping users earn money online through various activities like completing surveys and testing apps.' },
+    { title: 'Business', content: 'For partnership and business inquiries, please contact us at business@cash-center.fun. We are open to collaborations with offer walls and advertisers.' },
+    { title: 'Contact', content: 'For general questions, you can reach our team at contact@cash-center.fun. For account or technical issues, please use the support contact.' },
+    { title: 'Affiliate', content: 'Our affiliate program is coming soon! Check back later for more details on how you can earn by referring new users to Cash-Center.fun.' },
   ];
 
+  const legalLinks = [
+      { title: 'Terms of Service', content: 'By using our services, you agree to be bound by these Terms of Service. You must be at least 18 years old to create an account. You are responsible for all activities that occur under your account. Prohibited activities include using automated scripts, impersonating others, fraudulent activity, and violating any laws. We may terminate your access to our services at any time for any reason. Our liability is limited to the fullest extent permitted by law.'},
+      { title: 'Privacy Policy', content: 'We collect personal data you provide (name, email) and derivative data (IP address, browser type) to manage your account and improve our service. We may share your information with third-party service providers for tasks like payment processing and data analysis, or if required by law. We use security measures to protect your information, but no method is 100% secure.'},
+      { title: 'Cookie Policy', content: 'Our website uses essential cookies to ensure basic functionality like user sessions and security. We do not use third-party tracking or advertising cookies. By using our site, you consent to the use of these necessary cookies.'},
+  ]
+
   const supportLinks = [
-    { title: 'FAQ', content: 'Find answers to frequently asked questions here. (Content coming soon)' },
-    { title: 'Help Center', content: 'Visit our help center for detailed guides. (Content coming soon)' },
-    { title: 'Contact Support', content: 'Contact our support team for any issues. (Content coming soon)' },
+    { title: 'FAQ', content: 'How do I earn money? By completing offers from our partners. How do I get paid? You can request a payout via PayPal, crypto, or gift cards once you reach the minimum threshold. Is it free? Yes, joining and earning on Cash-Center.fun is completely free.' },
+    { title: 'Help Center', content: 'For detailed guides on how to complete offers, request payouts, or resolve common issues, please visit our dedicated Help Center section (Coming Soon).' },
+    { title: 'Contact Support', content: 'If you are facing technical issues or have a problem with your account, please contact our support team directly at support@cash-center.fun for assistance.' },
   ];
 
   return (
@@ -45,18 +52,17 @@ export function Footer() {
                   <InfoDialog title={link.title} content={link.content} />
                 </li>
               ))}
-               <li><Link href="#" className="hover:text-primary transition-colors">Affiliate</Link></li>
             </ul>
           </div>
 
           <div>
             <h3 className="font-bold text-white mb-4 uppercase tracking-wider">Legal</h3>
             <ul className="space-y-3 text-gray-400">
-              <li><Link href="/terms" className="hover:text-primary transition-colors">Terms of Service</Link></li>
-              <li><Link href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
-              <li>
-                <InfoDialog title="Cookie Policy" content="Our website uses cookies to enhance your experience. (Detailed content coming soon)" />
-              </li>
+              {legalLinks.map(link => (
+                <li key={link.title}>
+                  <InfoDialog title={link.title} content={link.content} />
+                </li>
+              ))}
             </ul>
           </div>
 

@@ -35,6 +35,24 @@
       "description": "A creative image for special high-value offers.",
       "imageUrl": "https://images.unsplash.com/photo-1546380841-bf3afc314a5d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMGNyZWF0aXZlfGVufDB8fHx8MTc2MjY4MTQzNnww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "abstract creative"
+    },
+    {
+      "id": "how-it-works-1",
+      "description": "A user signing up on a modern interface.",
+      "imageUrl": "https://images.unsplash.com/photo-1529539795054-3c162a44b490?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "imageHint": "user signup"
+    },
+    {
+      "id": "how-it-works-2",
+      "description": "A person completing a task or a survey on a laptop.",
+      "imageUrl": "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "imageHint": "completing tasks"
+    },
+    {
+      "id": "how-it-works-3",
+      "description": "A visual representation of receiving money or rewards.",
+      "imageUrl": "https://images.unsplash.com/photo-1579621970795-87facc2f976d?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "imageHint": "receiving money"
     }
   ]
 }

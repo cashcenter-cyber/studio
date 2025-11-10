@@ -1,12 +1,11 @@
 'use server'
 
 import { z } from 'zod'
-import { adminDb } from './firebase/admin'
-import { collection, addDoc, serverTimestamp, doc, updateDoc, writeBatch, getDocs, query, where, getDoc } from 'firebase/firestore'
+import { adminDb, verifyIdToken } from './firebase/admin'
+import { collection, doc, updateDoc, getDoc } from 'firebase/firestore'
 import type { Payout, UserProfile } from './types'
 import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
-import { verifyIdToken } from '@/lib/firebase/admin'
 
 
 const payoutSchema = z.object({
@@ -36,6 +35,11 @@ export async function requestPayout(values: z.infer<typeof payoutSchema>) {
   }
 
   const { amount, method, payoutAddress } = validatedFields.data
+  
+  if (!adminDb) {
+      return { success: false, error: 'Database service is not available.'}
+  }
+
   const userRef = doc(adminDb, 'users', currentUser.uid)
 
   try {
@@ -53,16 +57,15 @@ export async function requestPayout(values: z.infer<typeof payoutSchema>) {
         transaction.update(userRef, { currentBalance: newBalance });
 
         const payoutRef = collection(adminDb, 'payouts');
-        const newPayout: Omit<Payout, 'id' | 'processedAt'> = {
+        const newPayout: Omit<Payout, 'id' | 'processedAt' | 'requestedAt'> = {
             userId: currentUser.uid,
             username: userProfile.username,
             amount,
             method,
             payoutAddress,
             status: 'pending',
-            requestedAt: serverTimestamp() as any,
         }
-        transaction.set(doc(payoutRef), newPayout);
+        transaction.set(doc(payoutRef), newPayout, { merge: true });
         return { newBalance };
     })
     
@@ -75,6 +78,9 @@ export async function requestPayout(values: z.infer<typeof payoutSchema>) {
 }
 
 export async function processPayoutAction(payoutId: string, newStatus: 'approved' | 'declined') {
+    if (!adminDb) {
+        return { success: false, error: 'Database service is not available.' };
+    }
     try {
         const payoutRef = doc(adminDb, 'payouts', payoutId);
         const payoutDoc = await getDoc(payoutRef);
@@ -97,7 +103,6 @@ export async function processPayoutAction(payoutId: string, newStatus: 'approved
         
         await updateDoc(payoutRef, {
             status: newStatus,
-            processedAt: serverTimestamp(),
         });
         
         revalidatePath('/dashboard/payouts/admin');

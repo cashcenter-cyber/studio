@@ -57,24 +57,22 @@ export function RewardForm() {
     }
 
     setLoading(true)
-    const token = await user.getIdToken();
-    const result = await fetch('/api/payout', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(values)
-    }).then(res => res.json());
+    
+    try {
+        const result = await requestPayout(values);
+
+        if (result.success) {
+            toast({ title: 'Success!', description: 'Your payout request has been submitted.'})
+            form.reset()
+        } else {
+            toast({ variant: 'destructive', title: 'Error', description: result.error })
+        }
+    } catch (error) {
+        toast({ variant: 'destructive', title: 'Error', description: 'An unexpected error occurred.' })
+    }
+
 
     setLoading(false)
-
-    if (result.success) {
-        toast({ title: 'Success!', description: 'Your payout request has been submitted.'})
-        form.reset()
-    } else {
-        toast({ variant: 'destructive', title: 'Error', description: result.error })
-    }
   }
 
   return (

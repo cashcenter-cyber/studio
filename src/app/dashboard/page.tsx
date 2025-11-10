@@ -2,19 +2,16 @@
 
 import { useAuth } from '@/hooks/use-auth';
 import { StatCard } from '@/components/dashboard/stat-card';
-import { DollarSign, CheckCircle, Clock, Copy, Trash2, Loader2 } from 'lucide-react';
+import { DollarSign, CheckCircle, Clock, Trash2, Loader2 } from 'lucide-react';
 import { useCollection } from '@/firebase';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { collection, query, where } from 'firebase/firestore';
 import { useFirestore, useMemoFirebase } from '@/firebase';
 import type { Payout } from '@/lib/types';
 import { TransactionList } from '@/components/dashboard/transaction-list';
 import { GlassCard, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/glass-card';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Skeleton } from '@/components/ui/skeleton';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,6 +25,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { signOut } from 'firebase/auth';
 import { useAuthService } from '@/firebase';
+import { UserProfileCard } from '@/components/dashboard/user-profile';
 
 async function deleteAndAnonymizeUser(userId: string, token: string | undefined) {
     if (!token) {
@@ -68,19 +66,7 @@ export default function DashboardPage() {
 
   const { data: pendingPayouts, isLoading: isLoadingPayouts } = useCollection<Payout>(payoutsQuery);
 
-  const pendingAmount = useMemo(() => {
-    return pendingPayouts?.reduce((sum, payout) => sum + payout.amount, 0) ?? 0;
-  }, [pendingPayouts]);
-
-  const handleCopy = () => {
-    if (userProfile?.referralCode) {
-        navigator.clipboard.writeText(userProfile.referralCode);
-        toast({
-            title: 'Copied!',
-            description: 'Your referral code has been copied to the clipboard.',
-        });
-    }
-  }
+  const pendingAmount = pendingPayouts?.reduce((sum, payout) => sum + payout.amount, 0) ?? 0;
 
   const handleDeleteAccount = async () => {
     if (!user) return;
@@ -139,28 +125,7 @@ export default function DashboardPage() {
         <div className="space-y-6">
             <div>
                 <h2 className="text-2xl font-bold font-headline mb-4">My Profile</h2>
-                 <GlassCard>
-                    <CardContent className="pt-6 space-y-6">
-                        <div className="space-y-2">
-                            <Label htmlFor="username">Username</Label>
-                            <Input id="username" value={userProfile?.username ?? ''} readOnly />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="email">Email</Label>
-                            <Input id="email" value={userProfile?.email ?? ''} readOnly />
-                        </div>
-                         <div className="space-y-2">
-                            <Label htmlFor="referral">Your Referral Code</Label>
-                            <div className="flex items-center gap-2">
-                                <Input id="referral" value={userProfile?.referralCode ?? ''} readOnly className="font-mono" />
-                                <Button variant="outline" size="icon" onClick={handleCopy}>
-                                    <Copy className="h-4 w-4" />
-                                </Button>
-                            </div>
-                             <p className="text-xs text-muted-foreground">Share this code to earn 2% of your referrals' earnings!</p>
-                        </div>
-                    </CardContent>
-                </GlassCard>
+                 <UserProfileCard />
             </div>
             <div>
                 <h2 className="text-2xl font-bold font-headline mb-4 text-destructive">Danger Zone</h2>

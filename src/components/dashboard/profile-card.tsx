@@ -7,9 +7,10 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Copy } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { Skeleton } from "../ui/skeleton"
 
 export function ProfileCard() {
-    const { user, userProfile } = useAuth();
+    const { user, userProfile, loading } = useAuth();
     const { toast } = useToast();
 
     const handleCopy = () => {
@@ -22,8 +23,33 @@ export function ProfileCard() {
         }
     }
 
+    if (loading) {
+        return (
+            <GlassCard>
+                <CardHeader>
+                    <Skeleton className="h-6 w-1/2" />
+                    <Skeleton className="h-4 w-3/4" />
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    <div className="space-y-2">
+                        <Skeleton className="h-4 w-1/4" />
+                        <Skeleton className="h-10 w-full" />
+                    </div>
+                     <div className="space-y-2">
+                        <Skeleton className="h-4 w-1/4" />
+                        <Skeleton className="h-10 w-full" />
+                    </div>
+                     <div className="space-y-2">
+                        <Skeleton className="h-4 w-1/4" />
+                        <Skeleton className="h-10 w-full" />
+                    </div>
+                </CardContent>
+            </GlassCard>
+        )
+    }
+
     if (!user || !userProfile) {
-        return null;
+        return null; // Should not happen if not loading, but good practice
     }
 
     return (

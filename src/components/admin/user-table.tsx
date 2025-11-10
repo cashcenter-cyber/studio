@@ -78,7 +78,7 @@ export function UserTable({ users }: { users: UserProfile[] }) {
         <TableRow>
           <TableHead>Username</TableHead>
           <TableHead>Email</TableHead>
-          <TableHead>Role</TableHead>
+          <TableHead>Status</TableHead>
           <TableHead>Balance</TableHead>
           <TableHead>Joined</TableHead>
           <TableHead className="text-right">Actions</TableHead>

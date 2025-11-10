@@ -32,6 +32,6 @@ export const verifyIdToken = async (token: string): Promise<DecodedIdToken | nul
   }
 };
 
-export const isAdmin = (decodedToken: DecodedIdToken | null): boolean => {
+export const isAdmin = (decodedToken: DecodedIdToken): boolean => {
     return decodedToken?.admin === true;
 }

@@ -15,7 +15,7 @@ export async function POST(request: Request) {
   const token = authHeader.split('Bearer ')[1];
   const decodedToken = await verifyIdToken(token);
 
-  if (!isAdmin(decodedToken)) {
+  if (!decodedToken || !isAdmin(decodedToken)) {
     return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });
   }
 
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     batch.update(userRef, {
       email: `anonymized_${userId}@example.com`,
       username: `anonymized_user_${userId}`,
-      anonymized: true,
+      status: 'anonymized',
     });
 
     // 2. Anonymize payouts

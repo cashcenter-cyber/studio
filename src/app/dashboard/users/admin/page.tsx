@@ -11,9 +11,6 @@ async function getUsers(): Promise<UserProfile[]> {
   const q = query(usersCol, orderBy('joinDate', 'desc'));
   const snapshot = await getDocs(q);
   
-  // Note: We are casting createdAt from Firestore Timestamp to a plain JS Date
-  // This is safe to do in Server Components but not in Client Components
-  // without proper serialization.
   return snapshot.docs.map(doc => {
     const data = doc.data();
     return {

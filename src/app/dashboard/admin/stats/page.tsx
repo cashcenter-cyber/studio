@@ -1,7 +1,7 @@
 import { adminDb } from '@/lib/firebase/admin';
 import { StatCard } from '@/components/dashboard/stat-card';
 import { DollarSign, Users, CheckCircle, Gift } from 'lucide-react';
-import { collection, getDocs, query, where, getCountFromServer } from 'firebase/firestore';
+import { collection, getDocs, query, where, getCountFromServer, collectionGroup } from 'firebase/firestore';
 
 async function getStats() {
     if (!adminDb) {
@@ -16,13 +16,15 @@ async function getStats() {
     const usersSnapshot = await getCountFromServer(usersCollection);
     const userCount = usersSnapshot.data().count;
 
-    const payoutsQuery = query(collection(adminDb, 'payouts'), where('status', '==', 'completed'));
+    const payoutsQuery = query(collection(adminDb, 'payouts'), where('status', '==', 'approved'));
     const payoutsSnapshot = await getDocs(payoutsQuery);
     const totalPaidOut = payoutsSnapshot.docs.reduce((sum, doc) => sum + doc.data().amount, 0);
     
-    // This is a placeholder as we don't have offers data yet.
-    const offersCompleted = 0; 
-    const availableOffers = 0;
+    const transactionsQuery = query(collectionGroup(adminDb, 'transactions'), where('type', '==', 'earn'));
+    const transactionsSnapshot = await getCountFromServer(transactionsQuery);
+    const offersCompleted = transactionsSnapshot.data().count;
+
+    const availableOffers = 0; // Placeholder as we don't have an offers collection yet
 
     return {
         userCount,

@@ -6,24 +6,58 @@ import { PayoutLogos } from '@/components/home/payout-logos';
 import { Stats } from '@/components/home/stats';
 import { Container } from '@/components/ui/container';
 import { DollarSign, Users, CheckCircle, Gift } from 'lucide-react';
+import { adminDb } from '@/lib/firebase/admin';
+import { collection, getDocs, query, where, getCountFromServer, collectionGroup } from 'firebase/firestore';
 
-const stats = [
+
+async function getHomepageStats() {
+    if (!adminDb) {
+        return {
+            totalPaidOut: 0,
+            userCount: 0,
+            offersCompleted: 0,
+        }
+    }
+    
+    const usersSnapshot = await getCountFromServer(collection(adminDb, 'users'));
+    const userCount = usersSnapshot.data().count;
+
+    const payoutsQuery = query(collection(adminDb, 'payouts'), where('status', '==', 'approved'));
+    const payoutsSnapshot = await getDocs(payoutsQuery);
+    const totalPaidOut = payoutsSnapshot.docs.reduce((sum, doc) => sum + doc.data().amount, 0);
+
+    const transactionsQuery = query(collectionGroup(adminDb, 'transactions'), where('type', '==', 'earn'));
+    const transactionsSnapshot = await getCountFromServer(transactionsQuery);
+    const offersCompleted = transactionsSnapshot.data().count;
+
+    return {
+        totalPaidOut,
+        userCount,
+        offersCompleted,
+    }
+}
+
+
+export default async function Home() {
+  const statsData = await getHomepageStats();
+
+  const stats = [
     {
         icon: DollarSign,
         label: 'Total Paid Out',
-        value: '$0',
+        value: `$${(statsData.totalPaidOut / 1000).toFixed(2)}`,
         description: 'in cash and prizes'
     },
     {
         icon: Users,
         label: 'Happy Members',
-        value: '0',
+        value: statsData.userCount.toLocaleString(),
         description: 'and growing daily'
     },
     {
         icon: CheckCircle,
         label: 'Offers Completed',
-        value: '0',
+        value: statsData.offersCompleted.toLocaleString(),
         description: 'tasks finished by our users'
     },
     {
@@ -34,12 +68,11 @@ const stats = [
     }
 ]
 
-export default function Home() {
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
       <main className="flex-1">
-        <Hero activeUsers="0" rewardsPaid="$0" />
+        <Hero activeUsers={statsData.userCount.toLocaleString()} rewardsPaid={`$${(statsData.totalPaidOut / 1000).toFixed(2)}`} />
         <Container>
           <HowItWorks />
           <Stats stats={stats} />

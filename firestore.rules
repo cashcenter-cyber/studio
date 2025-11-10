@@ -9,7 +9,8 @@
  * Data Structure:
  * - /users/{userId}: Stores user profile data.
  * - /users/{userId}/transactions/{transactionId}: Stores transaction history for each user.
- * - /payouts/{payoutId}: Stores all user payout requests for admin processing.
+ * - /users/{userId}/payouts/{payoutId}: Stores a user's own payout history for their dashboard view.
+ * - /payouts/{payoutId}: Root collection for all user payout requests for admin processing.
  * - /offers/{offerId}: Stores all available offers.
  * - /roles_admin/{userId}: Used to assign global admin role.
  */
@@ -34,7 +35,15 @@ service cloud.firestore {
     }
     
     /**
-     * @description Secure payouts. Users can create them and read their own. Admins can read list and update.
+     * @description Secure user-specific payouts for dashboard view. Only the user can read their own.
+     */
+    match /users/{userId}/payouts/{payoutId} {
+        allow read: if isSignedIn() && isOwner(userId);
+        allow write: if false; // User payouts are created via a server action to the root collection
+    }
+
+    /**
+     * @description Secure payouts root collection. Users can create them. Admins can read list and update.
      */
     match /payouts/{payoutId} {
       allow get: if isSignedIn() && (isOwner(resource.data.userId) || isAdmin());

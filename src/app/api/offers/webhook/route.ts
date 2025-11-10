@@ -1,7 +1,8 @@
+
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase/admin';
-import { doc, updateDoc, increment, collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import type { Transaction, OfferwallTransaction } from '@/lib/types';
+import { doc, updateDoc, increment, collection, addDoc, serverTimestamp, getDoc } from 'firebase/firestore';
+import type { Transaction, OfferwallTransaction, UserProfile } from '@/lib/types';
 
 export async function POST(request: Request) {
   const partnerSecret = request.headers.get('x-partner-secret');
@@ -22,15 +23,22 @@ export async function POST(request: Request) {
     }
 
     const userRef = doc(adminDb, 'users', userId);
+    const userDoc = await getDoc(userRef);
+
+    if (!userDoc.exists()) {
+        return NextResponse.json({ success: false, error: 'User not found' }, { status: 404 });
+    }
+
+    const userProfile = userDoc.data() as UserProfile;
+
+    // --- 1. Credit the user who completed the offer ---
     const transactionsRef = collection(userRef, 'transactions');
     
-    // Update user balance and lifetime earnings
     await updateDoc(userRef, {
       currentBalance: increment(amount),
       lifetimeEarnings: increment(amount)
     });
 
-    // Create a transaction record
     const newTransaction: Omit<Transaction, 'id'> = {
       userId,
       amount,
@@ -41,6 +49,37 @@ export async function POST(request: Request) {
       externalTransactionId: offerId,
     };
     await addDoc(transactionsRef, newTransaction);
+    
+    // --- 2. Handle Referral Commission ---
+    if (userProfile.referredBy) {
+        const referrerId = userProfile.referredBy;
+        const commissionAmount = Math.round(amount * 0.02); // 2% commission
+
+        if (commissionAmount > 0) {
+            const referrerRef = doc(adminDb, 'users', referrerId);
+            const referrerDoc = await getDoc(referrerRef);
+
+            if (referrerDoc.exists()) {
+                // Increment referrer's balances
+                await updateDoc(referrerRef, {
+                    currentBalance: increment(commissionAmount),
+                    referralEarnings: increment(commissionAmount)
+                });
+
+                // Create a transaction record for the referrer
+                const referrerTransactionsRef = collection(referrerRef, 'transactions');
+                const referralTransaction: Omit<Transaction, 'id'> = {
+                    userId: referrerId,
+                    amount: commissionAmount,
+                    type: 'referral',
+                    description: `Referral bonus from ${userProfile.username || 'user'}`,
+                    createdAt: serverTimestamp() as any,
+                    status: 'completed',
+                };
+                await addDoc(referrerTransactionsRef, referralTransaction);
+            }
+        }
+    }
     
     return NextResponse.json({ success: true, message: 'User credited successfully' });
 

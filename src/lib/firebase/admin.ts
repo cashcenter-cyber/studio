@@ -5,7 +5,7 @@ const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY_BASE64
   ? Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_KEY_BASE64, 'base64').toString('utf-8')
   : '';
 
-if (!admin.apps.length) {
+if (!admin.apps.length && serviceAccountKey) {
   try {
     admin.initializeApp({
       credential: admin.credential.cert(JSON.parse(serviceAccountKey)),
@@ -15,12 +15,14 @@ if (!admin.apps.length) {
   }
 }
 
-const adminAuth = admin.auth();
-const adminDb = admin.firestore();
+const adminAuth = admin.apps.length ? admin.auth() : null;
+const adminDb = admin.apps.length ? admin.firestore() : null;
+
 
 export { adminAuth, adminDb };
 
 export const verifyIdToken = async (token: string): Promise<DecodedIdToken | null> => {
+  if (!adminAuth) return null;
   try {
     const decodedToken = await adminAuth.verifyIdToken(token);
     return decodedToken;

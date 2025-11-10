@@ -34,7 +34,7 @@ const payoutSchema = z.object({
 })
 
 export function RewardForm() {
-  const { userProfile } = useAuth()
+  const { user, userProfile } = useAuth()
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
 
@@ -47,7 +47,7 @@ export function RewardForm() {
   })
 
   async function onSubmit(values: z.infer<typeof payoutSchema>) {
-    if (!userProfile) {
+    if (!userProfile || !user) {
         toast({ variant: 'destructive', title: 'Error', description: 'You must be logged in.' })
         return
     }
@@ -57,7 +57,16 @@ export function RewardForm() {
     }
 
     setLoading(true)
-    const result = await requestPayout(values)
+    const token = await user.getIdToken();
+    const result = await fetch('/api/payout', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(values)
+    }).then(res => res.json());
+
     setLoading(false)
 
     if (result.success) {

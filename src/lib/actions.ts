@@ -1,11 +1,13 @@
 'use server'
 
 import { z } from 'zod'
-import { auth } from '@/lib/firebase/config'
 import { adminDb } from './firebase/admin'
 import { collection, addDoc, serverTimestamp, doc, updateDoc, writeBatch, getDocs, query, where, getDoc } from 'firebase/firestore'
 import type { Payout, UserProfile } from './types'
 import { revalidatePath } from 'next/cache'
+import { headers } from 'next/headers'
+import { verifyIdToken } from '@/lib/firebase/admin'
+
 
 const payoutSchema = z.object({
   amount: z.coerce.number().min(1000),
@@ -14,10 +16,19 @@ const payoutSchema = z.object({
 })
 
 export async function requestPayout(values: z.infer<typeof payoutSchema>) {
-  const currentUser = auth.currentUser
-  if (!currentUser) {
-    return { success: false, error: 'You must be logged in to request a payout.' }
-  }
+    const authHeader = headers().get('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return { success: false, error: 'User is not authenticated.' };
+    }
+  
+    const token = authHeader.split('Bearer ')[1];
+    const decodedToken = await verifyIdToken(token);
+  
+    if (!decodedToken) {
+      return { success: false, error: 'Invalid authentication token.' };
+    }
+
+  const currentUser = decodedToken;
 
   const validatedFields = payoutSchema.safeParse(values)
   if (!validatedFields.success) {

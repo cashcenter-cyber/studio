@@ -2,24 +2,16 @@
  * @fileoverview Firestore Security Rules for CashCenter.fun.
  *
  * Core Philosophy:
- * This ruleset enforces a strict user-ownership model for user profiles, transactions, and payout requests. Administrative privileges are role-based.
+ * This ruleset enforces a strict user-ownership model for user profiles and transactions.
+ * Payouts are in a root collection for admin review, with user-specific read access.
+ * Administrative privileges are role-based.
  *
  * Data Structure:
  * - /users/{userId}: Stores user profile data.
  * - /users/{userId}/transactions/{transactionId}: Stores transaction history for each user.
- * - /users/{userId}/payouts/{payoutId}: Stores payout requests for each user.
+ * - /payouts/{payoutId}: Stores all user payout requests for admin processing.
+ * - /offers/{offerId}: Stores all available offers.
  * - /roles_admin/{userId}: Used to assign global admin role.
- *
- * Key Security Decisions:
- * - Users can only access their own profile data, transactions, and payout requests.
- * - Administrative privileges are granted to users with a document present in the `/roles_admin/{userId}` collection.
- * - Data validation is relaxed during the prototyping phase, focusing on authorization and relational integrity.
- *
- * Denormalization for Authorization:
- * - User roles are determined by the presence of a document in `/roles_admin/{userId}`, avoiding costly `get()` calls during rule evaluation.
- *
- * Structural Segregation:
- * - User-owned data (profiles, transactions, payouts) is stored under the `/users/{userId}` path, ensuring clear ownership and simplifying security rules.
  */
 rules_version = '2';
 service cloud.firestore {
@@ -27,72 +19,45 @@ service cloud.firestore {
 
     /**
      * @description Secure user profiles. Only the user can read or write their own profile.
-     * @path /users/{userId}
-     * @allow (create) User with ID 'user123' creates their profile. `request.auth.uid == 'user123'`
-     * @deny (create) User with ID 'user123' tries to create profile for 'user456'. `request.auth.uid == 'user123'`
-     * @allow (get) User with ID 'user123' reads their profile. `request.auth.uid == 'user123'`
-     * @deny (get) User with ID 'user123' tries to read profile for 'user456'. `request.auth.uid == 'user123'`
-     * @allow (update) User with ID 'user123' updates their profile. `request.auth.uid == 'user123'`
-     * @deny (update) User with ID 'user123' tries to update profile for 'user456'. `request.auth.uid == 'user123'`
-     * @principle Enforces document ownership for writes and reads.
      */
     match /users/{userId} {
-      allow get: if isSignedIn() && isOwner(userId);
-      allow list: if false; // Listing all users is not permitted.
+      allow read, update, delete: if isSignedIn() && isOwner(userId);
       allow create: if isSignedIn() && isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isSignedIn() && isExistingOwner(userId) && request.resource.data.id == resource.data.id;
-      allow delete: if isSignedIn() && isExistingOwner(userId);
+      allow list: if false; // Listing all users is not permitted for clients.
     }
 
     /**
      * @description Secure user transactions. Only the user can read or write their own transactions.
-     * @path /users/{userId}/transactions/{transactionId}
-     * @allow (create) User with ID 'user123' creates a transaction. `request.auth.uid == 'user123'`
-     * @deny (create) User with ID 'user123' tries to create a transaction for 'user456'. `request.auth.uid == 'user123'`
-     * @allow (get) User with ID 'user123' reads their transaction. `request.auth.uid == 'user123'`
-     * @deny (get) User with ID 'user123' tries to read transaction for 'user456'. `request.auth.uid == 'user123'`
-     * @allow (update) User with ID 'user123' updates their transaction. `request.auth.uid == 'user123'`
-     * @deny (update) User with ID 'user123' tries to update transaction for 'user456'. `request.auth.uid == 'user123'`
-     * @principle Enforces document ownership for writes and reads.
      */
     match /users/{userId}/transactions/{transactionId} {
-      allow get: if isSignedIn() && isOwner(userId);
-      allow list: if isSignedIn() && isOwner(userId);
-      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userId == userId;
-      allow update: if isSignedIn() && isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
-      allow delete: if isSignedIn() && isExistingOwner(userId);
+      allow read, write: if isSignedIn() && isOwner(userId);
+    }
+    
+    /**
+     * @description Secure payouts. Users can create them and read their own. Admins can read list and update.
+     */
+    match /payouts/{payoutId} {
+      allow get: if isSignedIn() && (isOwner(resource.data.userId) || isAdmin());
+      allow list: if isAdmin();
+      allow create: if isSignedIn() && isOwner(request.resource.data.userId);
+      allow update: if isAdmin();
+      allow delete: if false;
     }
 
     /**
-     * @description Secure user payouts. Only the user can read or write their own payouts.
-     * @path /users/{userId}/payouts/{payoutId}
-     * @allow (create) User with ID 'user123' creates a payout. `request.auth.uid == 'user123'`
-     * @deny (create) User with ID 'user123' tries to create a payout for 'user456'. `request.auth.uid == 'user123'`
-     * @allow (get) User with ID 'user123' reads their payout. `request.auth.uid == 'user123'`
-     * @deny (get) User with ID 'user123' tries to read payout for 'user456'. `request.auth.uid == 'user123'`
-     * @allow (update) User with ID 'user123' updates their payout. `request.auth.uid == 'user123'`
-     * @deny (update) User with ID 'user123' tries to update payout for 'user456'. `request.auth.uid == 'user123'`
-     * @principle Enforces document ownership for writes and reads.
+     * @description Public offers. Any signed-in user can read them.
      */
-    match /users/{userId}/payouts/{payoutId} {
-      allow get: if isSignedIn() && isOwner(userId);
-      allow list: if isSignedIn() && isOwner(userId);
-      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userId == userId;
-      allow update: if isSignedIn() && isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
-      allow delete: if isSignedIn() && isExistingOwner(userId);
+    match /offers/{offerId} {
+        allow get, list: if isSignedIn();
+        allow write: if isAdmin();
     }
 
-      /**
-       * @description Grants admin role. Only admins can read or write to this collection.
-       * @path /roles_admin/{userId}
-       */
-      match /roles_admin/{userId} {
-        allow get: if isAdmin();
-        allow list: if isAdmin();
-        allow create: if isAdmin();
-        allow update: if isAdmin();
-        allow delete: if isAdmin();
-      }
+    /**
+     * @description Grants admin role. Only admins can read or write to this collection.
+     */
+    match /roles_admin/{userId} {
+      allow get, list, write: if isAdmin();
+    }
 
     // Helper functions
     function isSignedIn() {
@@ -103,12 +68,8 @@ service cloud.firestore {
       return request.auth.uid == userId;
     }
 
-    function isExistingOwner(userId) {
-      return isOwner(userId) && resource != null;
+    function isAdmin() {
+      return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
-
-     function isAdmin() {
-          return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
-     }
   }
 }

@@ -2,7 +2,7 @@
 
 import { z } from 'zod'
 import { adminDb, verifyIdToken } from './firebase/admin'
-import { collection, doc, updateDoc, getDoc } from 'firebase/firestore'
+import { collection, doc, updateDoc, getDoc, serverTimestamp, addDoc } from 'firebase/firestore'
 import type { Payout, UserProfile } from './types'
 import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
@@ -41,6 +41,8 @@ export async function requestPayout(values: z.infer<typeof payoutSchema>) {
   }
 
   const userRef = doc(adminDb, 'users', currentUser.uid)
+  const payoutsRef = collection(adminDb, 'payouts');
+
 
   try {
     const result = await adminDb.runTransaction(async (transaction) => {
@@ -56,16 +58,17 @@ export async function requestPayout(values: z.infer<typeof payoutSchema>) {
         const newBalance = userProfile.currentBalance - amount;
         transaction.update(userRef, { currentBalance: newBalance });
 
-        const payoutRef = collection(adminDb, 'payouts');
-        const newPayout: Omit<Payout, 'id' | 'processedAt' | 'requestedAt'> = {
+        const newPayoutDocRef = doc(payoutsRef);
+        const newPayout: Omit<Payout, 'id'> = {
             userId: currentUser.uid,
             username: userProfile.username,
             amount,
             method,
             payoutAddress,
             status: 'pending',
+            requestedAt: serverTimestamp() as any,
         }
-        transaction.set(doc(payoutRef), newPayout, { merge: true });
+        transaction.set(newPayoutDocRef, newPayout);
         return { newBalance };
     })
     
@@ -103,6 +106,7 @@ export async function processPayoutAction(payoutId: string, newStatus: 'approved
         
         await updateDoc(payoutRef, {
             status: newStatus,
+            processedAt: serverTimestamp(),
         });
         
         revalidatePath('/dashboard/payouts/admin');

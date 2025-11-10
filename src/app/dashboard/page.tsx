@@ -17,8 +17,7 @@ export default function DashboardPage() {
   const payoutsQuery = useMemoFirebase(() => {
     if (!db || !user?.uid) return null;
     return query(
-      collection(db, 'payouts'), 
-      where('userId', '==', user.uid),
+      collection(db, 'users', user.uid, 'payouts'), 
       where('status', '==', 'pending')
     );
   }, [db, user?.uid]);

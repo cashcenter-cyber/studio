@@ -81,7 +81,7 @@ export function RewardForm() {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div className="p-4 rounded-md border border-primary/20 bg-primary/10 text-center">
             <p className="text-sm text-muted-foreground">Your Balance</p>
-            <p className="text-2xl font-bold font-headline text-primary">{userProfile?.currentBalance.toLocaleString() ?? 0} CASH</p>
+            <p className="text-2xl font-bold font-headline text-primary">{(userProfile?.currentBalance ?? 0).toLocaleString()} CASH</p>
         </div>
 
         <FormField

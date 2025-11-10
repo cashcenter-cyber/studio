@@ -32,7 +32,7 @@ export function Hero({ activeUsers, rewardsPaid }: HeroProps) {
                 </Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-                <Link href="#">
+                <Link href="#how-it-works">
                     Learn More
                 </Link>
             </Button>

@@ -21,7 +21,7 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section className="py-16">
+    <section id="how-it-works" className="py-16 scroll-mt-20">
       <h2 className="text-3xl font-bold font-headline text-center mb-2">How It Works</h2>
       <p className="text-center text-muted-foreground mb-12">Start Earning in Three Simple Steps</p>
       <div className="grid gap-8 md:grid-cols-3">

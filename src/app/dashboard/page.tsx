@@ -3,9 +3,31 @@
 import { useAuth } from '@/hooks/use-auth';
 import { StatCard } from '@/components/dashboard/stat-card';
 import { DollarSign, CheckCircle, Clock } from 'lucide-react';
+import { useCollection } from '@/firebase';
+import { useMemo } from 'react';
+import { collection, query, where, orderBy, limit } from 'firebase/firestore';
+import { useFirestore, useMemoFirebase } from '@/firebase';
+import type { Payout } from '@/lib/types';
+import { TransactionList } from '@/components/dashboard/transaction-list';
 
 export default function DashboardPage() {
-  const { userProfile } = useAuth();
+  const { user, userProfile } = useAuth();
+  const db = useFirestore();
+
+  const payoutsQuery = useMemoFirebase(() => {
+    if (!db || !user?.uid) return null;
+    return query(
+      collection(db, 'payouts'), 
+      where('userId', '==', user.uid),
+      where('status', '==', 'pending')
+    );
+  }, [db, user?.uid]);
+
+  const { data: pendingPayouts } = useCollection<Payout>(payoutsQuery);
+
+  const pendingAmount = useMemo(() => {
+    return pendingPayouts?.reduce((sum, payout) => sum + payout.amount, 0) ?? 0;
+  }, [pendingPayouts]);
 
   return (
     <div>
@@ -23,13 +45,13 @@ export default function DashboardPage() {
         />
         <StatCard
           title="Lifetime Earnings"
-          value="125,500 CASH"
+          value={`${(userProfile?.lifetimeEarnings ?? 0).toLocaleString()} CASH`}
           icon={CheckCircle}
           description="Total earned since joining"
         />
         <StatCard
           title="Pending Payouts"
-          value="0 CASH"
+          value={`${pendingAmount.toLocaleString()} CASH`}
           icon={Clock}
           description="Currently being processed"
         />
@@ -37,8 +59,8 @@ export default function DashboardPage() {
 
       <div className="mt-10">
         <h2 className="text-2xl font-bold font-headline mb-4">Recent Activity</h2>
-        <div className="glass-card p-6">
-            <p className="text-center text-muted-foreground">Your recent transactions will appear here.</p>
+        <div className="glass-card">
+            <TransactionList />
         </div>
       </div>
     </div>

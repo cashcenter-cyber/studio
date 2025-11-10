@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase/admin';
 import { doc, updateDoc, increment, collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import type { Transaction } from '@/lib/types';
+import type { Transaction, OfferwallTransaction } from '@/lib/types';
 
 export async function POST(request: Request) {
   const partnerSecret = request.headers.get('x-partner-secret');
@@ -14,7 +14,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const body = await request.json();
+    const body: OfferwallTransaction = await request.json();
     const { userId, amount, offerId, offerName } = body;
 
     if (!userId || !amount || !offerId) {
@@ -22,11 +22,12 @@ export async function POST(request: Request) {
     }
 
     const userRef = doc(adminDb, 'users', userId);
-    const transactionsRef = collection(adminDb, 'transactions');
+    const transactionsRef = collection(userRef, 'transactions');
     
-    // Update user balance
+    // Update user balance and lifetime earnings
     await updateDoc(userRef, {
-      currentBalance: increment(amount)
+      currentBalance: increment(amount),
+      lifetimeEarnings: increment(amount)
     });
 
     // Create a transaction record
@@ -36,6 +37,8 @@ export async function POST(request: Request) {
       type: 'earn',
       description: `Completed offer: ${offerName || offerId}`,
       createdAt: serverTimestamp() as any,
+      status: 'completed',
+      externalTransactionId: offerId,
     };
     await addDoc(transactionsRef, newTransaction);
     

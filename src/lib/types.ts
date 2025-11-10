@@ -54,3 +54,10 @@ export interface Offer {
     status: 'active' | 'inactive';
     externalId?: string;
 }
+
+export interface OfferwallTransaction {
+    userId: string;
+    amount: number;
+    offerId: string;
+    offerName?: string;
+}

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Gift, ShieldCheck, UserCog, BarChart3, Wallet, ListPlus, Trophy } from 'lucide-react';
+import { LayoutDashboard, Gift, ShieldCheck, UserCog, BarChart3, Wallet, ListPlus, Trophy, User } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { cn } from '@/lib/utils';
 
@@ -11,6 +11,7 @@ const navItems = [
   { href: '/dashboard/offers', icon: Wallet, label: 'Offers' },
   { href: '/dashboard/rewards', icon: Gift, label: 'Rewards' },
   { href: '/dashboard/leaderboards', icon: Trophy, label: 'Leaderboards' },
+  { href: '/dashboard/profile', icon: User, label: 'Profile' },
 ];
 
 const adminNavItems = [

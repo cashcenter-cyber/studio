@@ -12,6 +12,7 @@ import {
   Wallet,
   Gift,
   Trophy,
+  User,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
@@ -139,6 +140,12 @@ export function Header() {
                     <Link href="/dashboard">
                       <LayoutDashboard className="mr-2 h-4 w-4" />
                       <span>Dashboard</span>
+                    </Link>
+                  </DropdownMenuItem>
+                   <DropdownMenuItem asChild>
+                    <Link href="/dashboard/profile">
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Profile</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />

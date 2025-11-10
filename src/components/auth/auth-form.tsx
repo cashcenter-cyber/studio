@@ -35,6 +35,7 @@ const signUpSchema = z.object({
   username: z.string().min(3, { message: 'Username must be at least 3 characters.' }),
   email: z.string().email({ message: 'Please enter a valid email.' }),
   password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
+  referralCode: z.string().optional(),
 });
 
 const loginSchema = z.object({
@@ -119,7 +120,7 @@ export function AuthForm() {
   const SignUpForm = () => {
     const form = useForm<z.infer<typeof signUpSchema>>({
         resolver: zodResolver(signUpSchema),
-        defaultValues: { username: '', email: '', password: '' },
+        defaultValues: { username: '', email: '', password: '', referralCode: '' },
       });
   
       const onSubmit = async (values: z.infer<typeof signUpSchema>) => {
@@ -127,7 +128,7 @@ export function AuthForm() {
         try {
           // This part has to be blocking to ensure profile is created before redirect
           const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
-          await createUserProfile(db, userCredential.user, values.username);
+          await createUserProfile(db, userCredential.user, { username: values.username, referralCode: values.referralCode });
           handleAuthSuccess();
         } catch (error: any) {
           handleAuthError(error);
@@ -146,7 +147,10 @@ export function AuthForm() {
             <FormItem><FormLabel>Email</FormLabel><FormControl><Input placeholder="you@example.com" {...field} /></FormControl><FormMessage /></FormItem>
           )} />
           <FormField control={form.control} name="password" render={({ field }) => (
-            <FormItem><FormLabel>Password</FormLabel><FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl><FormMessage /></FormItem>
+            <FormItem><FormLabel>Password</FormLabel><FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl><FormMessage /></FormMessage /></FormItem>
+          )} />
+          <FormField control={form.control} name="referralCode" render={({ field }) => (
+            <FormItem><FormLabel>Referral Code (Optional)</FormLabel><FormControl><Input placeholder="Got a referral code?" {...field} /></FormControl><FormMessage /></FormItem>
           )} />
           <Button type="submit" className="w-full" disabled={loading}>{loading && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}Create Account</Button>
         </form>

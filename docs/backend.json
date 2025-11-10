@@ -21,16 +21,27 @@
         },
         "currentBalance": {
           "type": "number",
-          "description": "The user's current CASH balance.",
-          "format": "number"
+          "description": "The user's current CASH balance."
         },
         "role": {
           "type": "string",
           "description": "The user's role (e.g., 'user', 'admin')."
         },
         "referralCode": {
-            "type": "string",
-            "description": "A unique code for the user to share for referrals."
+          "type": "string",
+          "description": "A unique code for the user to share for referrals."
+        },
+        "referredBy": {
+            "type": ["string", "null"],
+            "description": "The UID of the user who referred this user."
+        },
+        "referralOf": {
+            "type": ["string", "null"],
+            "description": "The referral code that was used to sign up."
+        },
+        "referralEarnings": {
+            "type": "number",
+            "description": "Total earnings generated from referred users."
         }
       },
       "required": [

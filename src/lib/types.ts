@@ -11,13 +11,16 @@ export interface UserProfile {
   joinDate: Timestamp | Date; // Can be Timestamp from Firestore or Date after parsing
   status: 'active' | 'suspended' | 'anonymized';
   referralCode?: string;
+  referredBy?: string | null; // UID of the referrer
+  referralOf?: string | null; // Referral code used at signup
+  referralEarnings?: number; // Total earnings from referrals
 }
 
 export interface Transaction {
   id: string;
   userId: string;
   amount: number;
-  type: 'earn' | 'payout' | 'bonus' | 'adjustment';
+  type: 'earn' | 'payout' | 'bonus' | 'adjustment' | 'referral';
   externalTransactionId?: string;
   description: string;
   createdAt: Timestamp;

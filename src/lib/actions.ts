@@ -5,8 +5,6 @@ import { adminDb, verifyIdToken } from './firebase/admin'
 import { collection, doc, updateDoc, getDoc, serverTimestamp, addDoc } from 'firebase/firestore'
 import type { Payout, UserProfile } from './types'
 import { revalidatePath } from 'next/cache'
-import { headers } from 'next/headers'
-
 
 const payoutSchema = z.object({
   amount: z.coerce.number().min(1000),
@@ -14,13 +12,11 @@ const payoutSchema = z.object({
   payoutAddress: z.string().min(1),
 })
 
-export async function requestPayout(values: z.infer<typeof payoutSchema>) {
-    const authHeader = headers().get('Authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+export async function requestPayout(values: z.infer<typeof payoutSchema>, token: string) {
+    if (!token) {
       return { success: false, error: 'User is not authenticated.' };
     }
   
-    const token = authHeader.split('Bearer ')[1];
     const decodedToken = await verifyIdToken(token);
   
     if (!decodedToken) {

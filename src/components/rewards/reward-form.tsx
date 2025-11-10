@@ -59,7 +59,8 @@ export function RewardForm() {
     setLoading(true)
     
     try {
-        const result = await requestPayout(values);
+        const token = await user.getIdToken();
+        const result = await requestPayout(values, token);
 
         if (result.success) {
             toast({ title: 'Success!', description: 'Your payout request has been submitted.'})
@@ -113,6 +114,7 @@ export function RewardForm() {
                   <SelectItem value="amazon">Amazon Gift Card</SelectItem>
                   <SelectItem value="roblox">Roblox Gift Card</SelectItem>
                   <SelectItem value="google-play">Google Play Card</SelectItem>
+                  <SelectItem value="association">Donation à une association</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />

@@ -27,6 +27,10 @@
         "role": {
           "type": "string",
           "description": "The user's role (e.g., 'user', 'admin')."
+        },
+        "referralCode": {
+            "type": "string",
+            "description": "A unique code for the user to share for referrals."
         }
       },
       "required": [

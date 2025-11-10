@@ -2,6 +2,17 @@ import { doc, setDoc, serverTimestamp, Firestore } from 'firebase/firestore';
 import type { User } from 'firebase/auth';
 import type { UserProfile } from './types';
 
+// Simple function to generate a random string for referral codes
+const generateReferralCode = (length: number = 8) => {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return result;
+};
+
+
 export const createUserProfile = async (db: Firestore, userAuth: User, username: string | null = null) => {
   if (!userAuth) return;
 
@@ -16,6 +27,7 @@ export const createUserProfile = async (db: Firestore, userAuth: User, username:
     role: 'user', // Explicitly set role
     joinDate: serverTimestamp() as any,
     status: 'active',
+    referralCode: generateReferralCode(),
   };
 
   try {

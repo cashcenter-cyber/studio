@@ -10,6 +10,7 @@ export interface UserProfile {
   profilePicture?: string;
   joinDate: Timestamp | Date; // Can be Timestamp from Firestore or Date after parsing
   status: 'active' | 'suspended' | 'anonymized';
+  referralCode?: string;
 }
 
 export interface Transaction {

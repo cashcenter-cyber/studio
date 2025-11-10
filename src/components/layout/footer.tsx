@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { InfoDialog } from './info-dialog';
@@ -7,7 +9,7 @@ export function Footer() {
     { title: 'About', content: 'Cash-Center.fun is a platform dedicated to helping users earn money online through various activities like completing surveys and testing apps.' },
     { title: 'Business', content: 'For partnership and business inquiries, please contact us at business@cash-center.fun. We are open to collaborations with offer walls and advertisers.' },
     { title: 'Contact', content: 'For general questions, you can reach our team at contact@cash-center.fun. For account or technical issues, please use the support contact.' },
-    { title: 'Affiliate', content: 'Our affiliate program is coming soon! Check back later for more details on how you can earn by referring new users to Cash-Center.fun.' },
+    { title: 'Affiliate', content: 'Refer new users to Cash-Center.fun and earn 2% of their earnings for life! Share your unique referral code and start building your income stream.' },
   ];
 
   const legalLinks = [

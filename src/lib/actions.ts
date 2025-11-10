@@ -76,38 +76,33 @@ export async function requestPayout(values: z.infer<typeof payoutSchema>, token:
   }
 }
 
-export async function processPayoutAction(payoutId: string, newStatus: 'approved' | 'declined') {
-    if (!adminDb) {
-        return { success: false, error: 'Database service is not available.' };
+export async function processPayoutAction(payoutId: string, newStatus: 'approved' | 'declined', token: string | undefined) {
+    if (!token) {
+      return { success: false, error: 'Authentication token not found.' };
     }
+
     try {
-        const payoutRef = doc(adminDb, 'payouts', payoutId);
-        const payoutDoc = await getDoc(payoutRef);
-        if (!payoutDoc.exists()) {
-            throw new Error('Payout not found.');
-        }
-
-        if (newStatus === 'declined') {
-            const payoutData = payoutDoc.data() as Payout;
-            const userRef = doc(adminDb, 'users', payoutData.userId);
-            const userDoc = await getDoc(userRef);
-
-            if (userDoc.exists()) {
-                const userData = userDoc.data() as UserProfile;
-                await updateDoc(userRef, {
-                    currentBalance: userData.currentBalance + payoutData.amount
-                });
-            }
-        }
-        
-        await updateDoc(payoutRef, {
-            status: newStatus,
-            processedAt: serverTimestamp(),
+        const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/admin/payouts/process`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ payoutId, newStatus }),
         });
         
-        revalidatePath('/dashboard/payouts/admin');
-        revalidatePath('/dashboard/admin/users')
-        return { success: true };
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to process payout.');
+        }
+
+        const data = await response.json();
+        if (data.success) {
+            revalidatePath('/dashboard/payouts/admin');
+            revalidatePath('/dashboard/admin/users');
+        }
+        return data;
+
     } catch (error: any) {
         return { success: false, error: error.message };
     }

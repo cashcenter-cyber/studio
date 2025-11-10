@@ -1,3 +1,5 @@
+'use server';
+
 import { adminDb } from '@/lib/firebase/admin';
 import { StatCard } from '@/components/dashboard/stat-card';
 import { DollarSign, Users, CheckCircle, Gift } from 'lucide-react';
@@ -24,7 +26,9 @@ async function getStats() {
     const transactionsSnapshot = await getCountFromServer(transactionsQuery);
     const offersCompleted = transactionsSnapshot.data().count;
 
-    const availableOffers = 0; // Placeholder as we don't have an offers collection yet
+    const offersQuery = query(collection(adminDb, 'offers'), where('status', '==', 'active'));
+    const availableOffersSnapshot = await getCountFromServer(offersQuery);
+    const availableOffers = availableOffersSnapshot.data().count;
 
     return {
         userCount,

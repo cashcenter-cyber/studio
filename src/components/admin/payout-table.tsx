@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import type { Payout } from '@/lib/types'
 import {
   Table,
@@ -14,27 +14,33 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { formatDistanceToNow } from 'date-fns'
 import { Check, X, Loader2 } from 'lucide-react'
-import { processPayoutAction } from '@/lib/actions'
 import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/hooks/use-auth'
+import { processPayoutAction } from '@/lib/actions'
 
-export function PayoutTable({ payouts }: { payouts: Payout[] }) {
+export function PayoutTable({ payouts: initialPayouts }: { payouts: Payout[] }) {
+    const [payouts, setPayouts] = useState(initialPayouts);
     const [loading, setLoading] = useState<string | null>(null);
     const { toast } = useToast();
     const { user } = useAuth();
+    const [isPending, startTransition] = useTransition();
 
-    const handleProcess = async (payoutId: string, status: 'approved' | 'declined') => {
-        setLoading(payoutId);
-        const result = await processPayoutAction(payoutId, status);
-        if (result.success) {
-            toast({ title: 'Success', description: `Payout has been ${status}.`});
-             // Forcing a reload to see changes. A more robust solution would use state management.
-             window.location.reload();
-        } else {
-            toast({ variant: 'destructive', title: 'Error', description: result.error });
-        }
-        setLoading(null);
+    const handleProcess = (payoutId: string, status: 'approved' | 'declined') => {
+        startTransition(async () => {
+            setLoading(payoutId);
+            const token = await user?.getIdToken();
+            const result = await processPayoutAction(payoutId, status, token);
+            
+            if (result.success) {
+                toast({ title: 'Success', description: `Payout has been ${status}.`});
+                setPayouts(currentPayouts => currentPayouts.filter(p => p.id !== payoutId));
+            } else {
+                toast({ variant: 'destructive', title: 'Error', description: result.error });
+            }
+            setLoading(null);
+        });
     }
+
   return (
     <Table>
       <TableHeader>
@@ -65,10 +71,10 @@ export function PayoutTable({ payouts }: { payouts: Payout[] }) {
             <TableCell className="text-right space-x-2">
                 {loading === payout.id ? <Loader2 className="h-4 w-4 animate-spin inline-block" /> :
                 <>
-                    <Button size="icon" variant="outline" className="h-8 w-8 bg-green-500/10 border-green-500/30 hover:bg-green-500/20 text-green-400" onClick={() => handleProcess(payout.id, 'approved')}>
+                    <Button size="icon" variant="outline" className="h-8 w-8 bg-green-500/10 border-green-500/30 hover:bg-green-500/20 text-green-400" onClick={() => handleProcess(payout.id, 'approved')} disabled={isPending}>
                         <Check className="h-4 w-4" />
                     </Button>
-                    <Button size="icon" variant="outline" className="h-8 w-8 bg-red-500/10 border-red-500/30 hover:bg-red-500/20 text-red-400" onClick={() => handleProcess(payout.id, 'declined')}>
+                    <Button size="icon" variant="outline" className="h-8 w-8 bg-red-500/10 border-red-500/30 hover:bg-red-500/20 text-red-400" onClick={() => handleProcess(payout.id, 'declined')} disabled={isPending}>
                         <X className="h-4 w-4" />
                     </Button>
                 </>

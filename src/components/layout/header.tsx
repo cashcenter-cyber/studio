@@ -11,6 +11,7 @@ import {
   Users,
   Wallet,
   Gift,
+  Trophy,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
@@ -39,18 +40,10 @@ export function Header() {
   const loggedInNavItems = [
     { href: '/dashboard/offers', label: 'Offers', icon: Wallet },
     { href: '/dashboard/rewards', label: 'Rewards', icon: Gift },
+    { href: '/dashboard/leaderboards', label: 'Leaderboards', icon: Trophy },
   ];
 
   const commonNavItems = [
-    {
-      label: 'Leaderboards',
-      icon: ChevronDown,
-      isDropdown: true,
-      items: [
-        { label: 'Monthly' },
-        { label: 'All Time' },
-      ],
-    },
     {
       href: '#',
       label: 'FAQ',
@@ -92,18 +85,7 @@ export function Header() {
                 {item.label}
               </Link>
            ))}
-          {commonNavItems.map((item) =>
-            item.isDropdown ? (
-              <DropdownMenu key={item.label}>
-                <DropdownMenuTrigger className="flex items-center gap-1 hover:text-white transition-colors outline-none">
-                  {item.label}
-                  <item.icon className="h-4 w-4" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="glass-card">
-                  {item.items?.map(subItem => <DropdownMenuItem key={subItem.label}>{subItem.label}</DropdownMenuItem>)}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
+          {commonNavItems.map((item) => (
               <Link
                 key={item.label}
                 href={item.href!}

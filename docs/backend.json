@@ -205,6 +205,12 @@
           "description": "Stores admin roles. Existence of a document indicates admin status. No data required in the document.",
           "params": [{ "name": "userId", "description": "The unique identifier of a user." }]
         }
+      },
+       {
+        "path": "/dashboard/leaderboards",
+        "definition": {
+          "description": "Page to display user leaderboards for monthly and all-time earnings."
+        }
       }
     ],
     "reasoning": "The Firestore data structure is designed to ensure security, scalability, and debuggability. User data, transactions, and payout requests are stored in separate collections with path-based ownership. The new 'offers' collection is a top-level collection, as offers are public data and do not belong to a specific user, making them easily queryable for all users."

@@ -29,6 +29,7 @@ export async function POST(request: Request) {
     
     const payoutRef = doc(adminDb, 'payouts', payoutId);
     
+    // If payout is declined, refund the user's balance
     if (newStatus === 'declined') {
         const payoutDoc = await getDoc(payoutRef);
         if (payoutDoc.exists()) {
@@ -45,6 +46,7 @@ export async function POST(request: Request) {
         }
     }
     
+    // Update the payout status and processed timestamp
     await updateDoc(payoutRef, {
       status: newStatus,
       processedAt: serverTimestamp(),

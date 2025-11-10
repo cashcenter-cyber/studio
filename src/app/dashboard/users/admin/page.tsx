@@ -8,16 +8,20 @@ async function getUsers(): Promise<UserProfile[]> {
     return [];
   }
   const usersCol = collection(adminDb, 'users');
+  // Order by joinDate, which should be a server timestamp
   const q = query(usersCol, orderBy('joinDate', 'desc'));
   const snapshot = await getDocs(q);
   
   return snapshot.docs.map(doc => {
     const data = doc.data();
+    // Ensure joinDate is converted to a Date object for client-side formatting
+    const joinDate = data.joinDate?.toDate ? data.joinDate.toDate() : new Date();
+
     return {
       ...data,
       uid: doc.id,
-      joinDate: data.joinDate.toDate(), 
-    } as unknown as UserProfile;
+      joinDate: joinDate, 
+    } as UserProfile;
   });
 }
 

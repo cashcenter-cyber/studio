@@ -9,6 +9,8 @@ import {
   ChevronDown,
   HelpCircle,
   Users,
+  Wallet,
+  Gift,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
@@ -24,6 +26,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { signOut } from 'firebase/auth';
 import { useAuthService } from '@/firebase';
 import { ThemeSwitcher } from './theme-switcher';
+import { cn } from '@/lib/utils';
 
 export function Header() {
   const { user, userProfile, loading } = useAuth();
@@ -33,12 +36,20 @@ export function Header() {
     await signOut(auth);
   };
 
-  const navItems = [
+  const loggedInNavItems = [
+    { href: '/dashboard/offers', label: 'Offers', icon: Wallet },
+    { href: '/dashboard/rewards', label: 'Rewards', icon: Gift },
+  ];
+
+  const commonNavItems = [
     {
-      href: '#',
       label: 'Leaderboards',
       icon: ChevronDown,
       isDropdown: true,
+      items: [
+        { label: 'Monthly' },
+        { label: 'All Time' },
+      ],
     },
     {
       href: '#',
@@ -71,7 +82,17 @@ export function Header() {
           <ThemeSwitcher />
         </div>
         <nav className="hidden md:flex flex-1 items-center justify-center space-x-6 text-sm font-medium text-gray-300">
-          {navItems.map((item) =>
+           {user && loggedInNavItems.map((item) => (
+             <Link
+                key={item.label}
+                href={item.href}
+                className="flex items-center gap-2 hover:text-white transition-colors"
+              >
+                <item.icon className="h-4 w-4" />
+                {item.label}
+              </Link>
+           ))}
+          {commonNavItems.map((item) =>
             item.isDropdown ? (
               <DropdownMenu key={item.label}>
                 <DropdownMenuTrigger className="flex items-center gap-1 hover:text-white transition-colors outline-none">
@@ -79,15 +100,13 @@ export function Header() {
                   <item.icon className="h-4 w-4" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="glass-card">
-                  <DropdownMenuItem>Daily</DropdownMenuItem>
-                  <DropdownMenuItem>Weekly</DropdownMenuItem>
-                  <DropdownMenuItem>All Time</DropdownMenuItem>
+                  {item.items?.map(subItem => <DropdownMenuItem key={subItem.label}>{subItem.label}</DropdownMenuItem>)}
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
               <Link
                 key={item.label}
-                href={item.href}
+                href={item.href!}
                 className="flex items-center gap-2 hover:text-white transition-colors"
               >
                 <item.icon className="h-4 w-4" />

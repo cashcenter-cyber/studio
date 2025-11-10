@@ -109,9 +109,10 @@ export function RewardForm() {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent className="glass-card">
-                  <SelectItem value="paypal">PayPal</SelectItem>
-                  <SelectItem value="bitcoin">Bitcoin</SelectItem>
-                  <SelectItem value="amazon-gc">Amazon Gift Card</SelectItem>
+                  <SelectItem value="crypto">Crypto</SelectItem>
+                  <SelectItem value="amazon">Amazon Gift Card</SelectItem>
+                  <SelectItem value="roblox">Roblox Gift Card</SelectItem>
+                  <SelectItem value="google-play">Google Play Card</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -123,9 +124,9 @@ export function RewardForm() {
           name="payoutAddress"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Payout Address</FormLabel>
+              <FormLabel>Payout Address/Details</FormLabel>
               <FormControl>
-                <Input placeholder="Your PayPal email or Bitcoin address" {...field} />
+                <Input placeholder="Your crypto address or email" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

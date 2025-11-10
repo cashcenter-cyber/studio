@@ -1,3 +1,4 @@
+'use client';
 import { doc, setDoc, serverTimestamp, Firestore, collection, query, where, getDocs, limit } from 'firebase/firestore';
 import type { User } from 'firebase/auth';
 import type { UserProfile } from './types';
@@ -22,7 +23,7 @@ export const createUserProfile = async (
   userAuth: User, 
   options: CreateUserOptions | null = { username: null }
 ) => {
-  if (!userAuth) return;
+  if (!userAuth) throw new Error("User object is missing.");
 
   const userRef = doc(db, 'users', userAuth.uid);
   let referredBy = null;
@@ -56,5 +57,7 @@ export const createUserProfile = async (
     await setDoc(userRef, newUserProfile);
   } catch (error) {
     console.error('Error creating user profile in Firestore:', error);
+    // Re-throw the error to be caught by the caller
+    throw new Error('Failed to create user profile in database.');
   }
 };

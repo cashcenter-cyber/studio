@@ -4,6 +4,14 @@ import { DollarSign, Users, CheckCircle, Gift } from 'lucide-react';
 import { collection, getDocs, query, where, getCountFromServer } from 'firebase/firestore';
 
 async function getStats() {
+    if (!adminDb) {
+        return {
+            userCount: 0,
+            totalPaidOut: 0,
+            offersCompleted: 0, 
+            availableOffers: 0,
+        }
+    }
     const usersCollection = collection(adminDb, 'users');
     const usersSnapshot = await getCountFromServer(usersCollection);
     const userCount = usersSnapshot.data().count;

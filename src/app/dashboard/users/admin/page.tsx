@@ -4,6 +4,9 @@ import type { UserProfile } from '@/lib/types';
 import { UserTable } from '@/components/admin/user-table';
 
 async function getUsers(): Promise<UserProfile[]> {
+  if (!adminDb) {
+    return [];
+  }
   const usersCol = collection(adminDb, 'users');
   const q = query(usersCol, orderBy('joinDate', 'desc'));
   const snapshot = await getDocs(q);

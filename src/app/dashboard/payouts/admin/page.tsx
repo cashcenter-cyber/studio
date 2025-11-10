@@ -5,6 +5,9 @@ import { Badge } from '@/components/ui/badge';
 import { adminDb } from '@/lib/firebase/admin';
 
 async function getPendingPayouts(): Promise<Payout[]> {
+  if (!adminDb) {
+    return [];
+  }
   const payoutsCol = collection(adminDb, 'payouts');
   const q = query(payoutsCol, where('status', '==', 'pending'), orderBy('requestedAt', 'asc'), limit(50));
   const snapshot = await getDocs(q);

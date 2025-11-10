@@ -10,7 +10,7 @@ export const createUserProfile = async (db: Firestore, userAuth: User, username:
   // Ensure role is explicitly set for all new users.
   const newUserProfile: Omit<UserProfile, 'uid'> = {
     email: userAuth.email,
-    username: username || userAuth.displayName,
+    username: username || userAuth.displayName || userAuth.email,
     currentBalance: 0,
     lifetimeEarnings: 0,
     role: 'user', // Explicitly set role

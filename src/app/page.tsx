@@ -17,6 +17,7 @@ async function getHomepageStats() {
             totalPaidOut: 0,
             userCount: 0,
             offersCompleted: 0,
+            availableOffers: 0,
         }
     }
     
@@ -31,10 +32,15 @@ async function getHomepageStats() {
     const transactionsSnapshot = await getCountFromServer(transactionsQuery);
     const offersCompleted = transactionsSnapshot.data().count;
 
+    const offersQuery = query(collection(adminDb, 'offers'), where('status', '==', 'active'));
+    const offersSnapshot = await getCountFromServer(offersQuery);
+    const availableOffers = offersSnapshot.data().count;
+
     return {
         totalPaidOut,
         userCount,
         offersCompleted,
+        availableOffers,
     }
 }
 
@@ -64,7 +70,7 @@ export default async function Home() {
     {
         icon: Gift,
         label: 'Available Offers',
-        value: '1,500+',
+        value: `${statsData.availableOffers.toLocaleString()}+`,
         description: 'from top brands'
     }
 ]

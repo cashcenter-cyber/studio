@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Gift, ShieldCheck, UserCog, BarChart3, Wallet } from 'lucide-react';
+import { LayoutDashboard, Gift, ShieldCheck, UserCog, BarChart3, Wallet, ListPlus } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { cn } from '@/lib/utils';
 
@@ -14,6 +14,7 @@ const navItems = [
 
 const adminNavItems = [
     { href: '/dashboard/admin/stats', icon: BarChart3, label: 'Stats' },
+    { href: '/dashboard/admin/offers', icon: ListPlus, label: 'Offers' },
   { href: '/dashboard/payouts/admin', icon: ShieldCheck, label: 'Payouts' },
   { href: '/dashboard/users/admin', icon: UserCog, label: 'Users' },
 ];

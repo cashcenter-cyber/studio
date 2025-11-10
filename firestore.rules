@@ -54,7 +54,7 @@ service cloud.firestore {
     }
 
     /**
-     * @description Public offers. Any signed-in user can read them.
+     * @description Public offers. Any signed-in user can read them. Only admins can write.
      */
     match /offers/{offerId} {
         allow get, list: if isSignedIn();
@@ -78,7 +78,7 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+      return get(/databases/$(database)/documents/roles_admin/$(request.auth.uid)).data.role == 'admin';
     }
   }
 }

@@ -2,8 +2,8 @@
 
 import { z } from 'zod'
 import { adminDb, verifyIdToken } from './firebase/admin'
-import { collection, doc, updateDoc, getDoc, serverTimestamp, addDoc } from 'firebase/firestore'
-import type { Payout, UserProfile } from './types'
+import { collection, doc, updateDoc, getDoc, serverTimestamp, addDoc, deleteDoc } from 'firebase/firestore'
+import type { Payout, UserProfile, Offer } from './types'
 import { revalidatePath } from 'next/cache'
 
 const payoutSchema = z.object({
@@ -110,5 +110,71 @@ export async function processPayoutAction(payoutId: string, newStatus: 'approved
         return { success: true };
     } catch (error: any) {
         return { success: false, error: error.message };
+    }
+}
+
+
+const offerSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().min(3, 'Name is too short'),
+  description: z.string().min(10, 'Description is too short'),
+  reward: z.coerce.number().positive('Reward must be positive'),
+  category: z.enum(['Game', 'Survey', 'App', 'Quiz']),
+  partner: z.string().min(2, 'Partner name is too short'),
+  imageUrl: z.string().url('Must be a valid URL'),
+  offerUrl: z.string().url('Must be a valid URL'),
+  status: z.enum(['active', 'inactive']),
+});
+
+export async function createOrUpdateOfferAction(formData: FormData) {
+    if (!adminDb) {
+        return { success: false, error: 'Database service is not available.' };
+    }
+
+    const values = Object.fromEntries(formData.entries());
+    const validatedFields = offerSchema.safeParse(values);
+
+    if (!validatedFields.success) {
+        return { success: false, error: 'Invalid data provided.', errors: validatedFields.error.flatten().fieldErrors };
+    }
+
+    const { id, ...offerData } = validatedFields.data;
+
+    try {
+        if (id) {
+            // Update existing offer
+            const offerRef = doc(adminDb, 'offers', id);
+            await updateDoc(offerRef, offerData);
+        } else {
+            // Create new offer
+            const offersRef = collection(adminDb, 'offers');
+            await addDoc(offersRef, offerData);
+        }
+        revalidatePath('/dashboard/admin/offers');
+        revalidatePath('/dashboard/offers');
+        return { success: true };
+    } catch (error: any) {
+        return { success: false, error: error.message || 'Failed to save offer.' };
+    }
+}
+
+export async function deleteOfferAction(offerId: string) {
+    if (!adminDb) {
+        return { success: false, error: 'Database service is not available.' };
+    }
+
+    if (!offerId) {
+        return { success: false, error: 'Offer ID is required.' };
+    }
+
+    try {
+        const offerRef = doc(adminDb, 'offers', offerId);
+        await deleteDoc(offerRef);
+
+        revalidatePath('/dashboard/admin/offers');
+        revalidatePath('/dashboard/offers');
+        return { success: true };
+    } catch (error: any) {
+        return { success: false, error: error.message || 'Failed to delete offer.' };
     }
 }

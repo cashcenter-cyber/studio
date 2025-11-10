@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { Header } from '@/components/layout/header';
 import { Sidebar } from '@/components/dashboard/sidebar';
 import { Loader2 } from 'lucide-react';
+import { Footer } from '@/components/layout/footer';
 
 export default function DashboardLayout({
   children,
@@ -33,12 +34,13 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen w-full">
+    <div className="min-h-screen w-full flex flex-col">
       <Header />
-      <div className="flex">
+      <div className="flex flex-1">
         <Sidebar />
         <main className="flex-1 p-4 md:p-8 lg:p-10">{children}</main>
       </div>
+      <Footer />
     </div>
   );
 }

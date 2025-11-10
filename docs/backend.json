@@ -123,6 +123,24 @@
         "status",
         "requestTimestamp"
       ]
+    },
+    "Offer": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Offer",
+      "type": "object",
+      "description": "Represents a task a user can complete to earn rewards.",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier for the offer." },
+        "name": { "type": "string", "description": "The name or title of the offer." },
+        "description": { "type": "string", "description": "A brief description of the offer." },
+        "reward": { "type": "number", "description": "The amount of CASH rewarded upon completion." },
+        "category": { "type": "string", "enum": ["Game", "Survey", "App", "Quiz"], "description": "The category of the offer." },
+        "partner": { "type": "string", "description": "The name of the offerwall partner providing the offer." },
+        "imageUrl": { "type": "string", "format": "uri", "description": "URL for an image representing the offer." },
+        "status": { "type": "string", "enum": ["active", "inactive"], "description": "The current status of the offer." },
+        "offerUrl": { "type": "string", "format": "uri", "description": "The URL the user is sent to to complete the offer." }
+      },
+      "required": ["id", "name", "reward", "category", "partner", "imageUrl", "status", "offerUrl"]
     }
   },
   "auth": {
@@ -137,35 +155,20 @@
         "path": "/users/{userId}",
         "definition": {
           "entityName": "User",
-          "schema": {
-            "$ref": "#/backend/entities/User"
-          },
+          "schema": { "$ref": "#/backend/entities/User" },
           "description": "Stores user profiles. Uses path-based ownership for private user data.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user."
-            }
-          ]
+          "params": [{ "name": "userId", "description": "The unique identifier of the user." }]
         }
       },
       {
         "path": "/users/{userId}/transactions/{transactionId}",
         "definition": {
           "entityName": "Transaction",
-          "schema": {
-            "$ref": "#/backend/entities/Transaction"
-          },
+          "schema": { "$ref": "#/backend/entities/Transaction" },
           "description": "Stores transaction history for each user. Uses path-based ownership.",
           "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user."
-            },
-            {
-              "name": "transactionId",
-              "description": "The unique identifier of the transaction."
-            }
+            { "name": "userId", "description": "The unique identifier of the user." },
+            { "name": "transactionId", "description": "The unique identifier of the transaction." }
           ]
         }
       },
@@ -173,39 +176,33 @@
         "path": "/users/{userId}/payouts/{payoutId}",
         "definition": {
           "entityName": "Payout",
-          "schema": {
-            "$ref": "#/backend/entities/Payout"
-          },
+          "schema": { "$ref": "#/backend/entities/Payout" },
           "description": "Stores payout requests for each user. Uses path-based ownership.",
           "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user."
-            },
-            {
-              "name": "payoutId",
-              "description": "The unique identifier of the payout request."
-            }
+            { "name": "userId", "description": "The unique identifier of the user." },
+            { "name": "payoutId", "description": "The unique identifier of the payout request." }
           ]
+        }
+      },
+      {
+        "path": "/offers/{offerId}",
+        "definition": {
+          "entityName": "Offer",
+          "schema": { "$ref": "#/backend/entities/Offer" },
+          "description": "Stores all available offers from various partners. Publicly readable.",
+          "params": [{ "name": "offerId", "description": "The unique identifier for the offer." }]
         }
       },
       {
         "path": "/roles_admin/{userId}",
         "definition": {
           "entityName": "AdminRole",
-          "schema": {
-            "$ref": "#/backend/entities/User"
-          },
+          "schema": { "$ref": "#/backend/entities/User" },
           "description": "Stores admin roles. Existence of a document indicates admin status. No data required in the document.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user."
-            }
-          ]
+          "params": [{ "name": "userId", "description": "The unique identifier of a user." }]
         }
       }
     ],
-    "reasoning": "The Firestore data structure is designed to ensure security, scalability, and debuggability, adhering to the principles of Authorization Independence and Structural Segregation. User data, transactions, and payout requests are stored in separate collections, with user-owned data stored in hierarchical paths for clear ownership. The design avoids hierarchical authorization dependencies by using path-based ownership and, where needed, membership maps with denormalized roles. This approach ensures atomic operations and easy-to-debug security rules. All collections will share homogeneous security postures simplifying security rules and avoiding the mixing of data with different access needs in the same collection. QAPs are supported by using path-based ownership and role based access control. The design facilitates secure list operations using declarative rules without filtering."
+    "reasoning": "The Firestore data structure is designed to ensure security, scalability, and debuggability. User data, transactions, and payout requests are stored in separate collections with path-based ownership. The new 'offers' collection is a top-level collection, as offers are public data and do not belong to a specific user, making them easily queryable for all users."
   }
 }

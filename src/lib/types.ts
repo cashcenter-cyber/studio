@@ -49,10 +49,12 @@ export interface Offer {
     name: string;
     description: string;
     reward: number;
-    category: string;
-    partnerId: string;
+    category: 'Game' | 'Survey' | 'App' | 'Quiz';
+    partner: string;
+    imageUrl: string;
     status: 'active' | 'inactive';
     externalId?: string;
+    offerUrl: string;
 }
 
 export interface OfferwallTransaction {

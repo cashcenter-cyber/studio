@@ -2,12 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Gift, ShieldCheck, UserCog, BarChart3 } from 'lucide-react';
+import { LayoutDashboard, Gift, ShieldCheck, UserCog, BarChart3, Wallet } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { cn } from '@/lib/utils';
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+  { href: '/dashboard/offers', icon: Wallet, label: 'Offers' },
   { href: '/dashboard/rewards', icon: Gift, label: 'Rewards' },
 ];
 
@@ -47,7 +48,7 @@ export function Sidebar() {
                   href={item.href}
                   className={cn(
                     'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
-                    pathname === item.href ? 'bg-sidebar-accent text-sidebar-accent-foreground' : 'text-sidebar-foreground'
+                    pathname.startsWith(item.href) ? 'bg-sidebar-accent text-sidebar-accent-foreground' : 'text-sidebar-foreground'
                   )}
                 >
                   <item.icon className="h-5 w-5" />

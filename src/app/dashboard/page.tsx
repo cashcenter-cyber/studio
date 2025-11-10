@@ -2,17 +2,61 @@
 
 import { useAuth } from '@/hooks/use-auth';
 import { StatCard } from '@/components/dashboard/stat-card';
-import { DollarSign, CheckCircle, Clock } from 'lucide-react';
+import { DollarSign, CheckCircle, Clock, Copy, Trash2, Loader2 } from 'lucide-react';
 import { useCollection } from '@/firebase';
-import { useMemo } from 'react';
-import { collection, query, where, orderBy, limit } from 'firebase/firestore';
+import { useMemo, useState } from 'react';
+import { collection, query, where } from 'firebase/firestore';
 import { useFirestore, useMemoFirebase } from '@/firebase';
 import type { Payout } from '@/lib/types';
 import { TransactionList } from '@/components/dashboard/transaction-list';
+import { GlassCard, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/glass-card';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { signOut } from 'firebase/auth';
+import { useAuthService } from '@/firebase';
+
+async function deleteAndAnonymizeUser(userId: string, token: string | undefined) {
+    if (!token) {
+        throw new Error('Authentication token not found.');
+    }
+    const response = await fetch('/api/admin/deleteUserAndAnonymizeData', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ userId }),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete user.');
+    }
+
+    return await response.json();
+}
+
 
 export default function DashboardPage() {
   const { user, userProfile } = useAuth();
   const db = useFirestore();
+  const auth = useAuthService();
+  const { toast } = useToast();
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const payoutsQuery = useMemoFirebase(() => {
     if (!db || !user?.uid) return null;
@@ -22,18 +66,46 @@ export default function DashboardPage() {
     );
   }, [db, user?.uid]);
 
-  const { data: pendingPayouts } = useCollection<Payout>(payoutsQuery);
+  const { data: pendingPayouts, isLoading: isLoadingPayouts } = useCollection<Payout>(payoutsQuery);
 
   const pendingAmount = useMemo(() => {
     return pendingPayouts?.reduce((sum, payout) => sum + payout.amount, 0) ?? 0;
   }, [pendingPayouts]);
 
+  const handleCopy = () => {
+    if (userProfile?.referralCode) {
+        navigator.clipboard.writeText(userProfile.referralCode);
+        toast({
+            title: 'Copied!',
+            description: 'Your referral code has been copied to the clipboard.',
+        });
+    }
+  }
+
+  const handleDeleteAccount = async () => {
+    if (!user) return;
+    setIsDeleting(true);
+    try {
+        const token = await user.getIdToken(true); // Force refresh the token
+        await deleteAndAnonymizeUser(user.uid, token);
+        toast({ title: 'Account Deleted', description: 'Your account has been successfully deleted and your data anonymized.' });
+        await signOut(auth);
+        window.location.href = '/';
+    } catch (error: any) {
+        toast({ variant: 'destructive', title: 'Deletion Error', description: error.message });
+        setIsDeleting(false);
+    }
+  }
+
+
   return (
-    <div>
-      <h1 className="text-3xl font-bold font-headline mb-2">
-        Welcome back, <span className="text-primary">{userProfile?.username || 'User'}</span>!
-      </h1>
-      <p className="text-muted-foreground mb-8">Here's a summary of your account activity.</p>
+    <div className="space-y-10">
+      <div>
+        <h1 className="text-3xl font-bold font-headline mb-2">
+          Welcome back, <span className="text-primary">{userProfile?.username || 'User'}</span>!
+        </h1>
+        <p className="text-muted-foreground">Here's a summary of your account activity and profile.</p>
+      </div>
       
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <StatCard
@@ -50,16 +122,80 @@ export default function DashboardPage() {
         />
         <StatCard
           title="Pending Payouts"
-          value={`${pendingAmount.toLocaleString()} CASH`}
+          value={isLoadingPayouts ? '...' : `${pendingAmount.toLocaleString()} CASH`}
           icon={Clock}
           description="Currently being processed"
         />
       </div>
 
-      <div className="mt-10">
-        <h2 className="text-2xl font-bold font-headline mb-4">Recent Activity</h2>
-        <div className="glass-card">
-            <TransactionList />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+        <div className="lg:col-span-2">
+            <h2 className="text-2xl font-bold font-headline mb-4">Recent Activity</h2>
+            <div className="glass-card">
+                <TransactionList />
+            </div>
+        </div>
+
+        <div className="space-y-6">
+            <div>
+                <h2 className="text-2xl font-bold font-headline mb-4">My Profile</h2>
+                 <GlassCard>
+                    <CardContent className="pt-6 space-y-6">
+                        <div className="space-y-2">
+                            <Label htmlFor="username">Username</Label>
+                            <Input id="username" value={userProfile?.username ?? ''} readOnly />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="email">Email</Label>
+                            <Input id="email" value={userProfile?.email ?? ''} readOnly />
+                        </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="referral">Your Referral Code</Label>
+                            <div className="flex items-center gap-2">
+                                <Input id="referral" value={userProfile?.referralCode ?? ''} readOnly className="font-mono" />
+                                <Button variant="outline" size="icon" onClick={handleCopy}>
+                                    <Copy className="h-4 w-4" />
+                                </Button>
+                            </div>
+                             <p className="text-xs text-muted-foreground">Share this code to earn 2% of your referrals' earnings!</p>
+                        </div>
+                    </CardContent>
+                </GlassCard>
+            </div>
+            <div>
+                <h2 className="text-2xl font-bold font-headline mb-4 text-destructive">Danger Zone</h2>
+                <GlassCard>
+                    <CardHeader>
+                        <CardTitle>Delete Account</CardTitle>
+                        <CardDescription>Permanently delete your account and anonymize all your data. This action is irreversible.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button variant="destructive" className="w-full">
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Delete My Account
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent className="glass-card">
+                                <AlertDialogHeader>
+                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    This action cannot be undone. This will permanently delete your authentication account and anonymize all associated data (profile, transactions, payouts). You will be logged out immediately.
+                                </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleDeleteAccount} className="bg-destructive hover:bg-destructive/90" disabled={isDeleting}>
+                                    {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                                    Yes, delete my account
+                                </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    </CardContent>
+                </GlassCard>
+            </div>
         </div>
       </div>
     </div>

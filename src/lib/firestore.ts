@@ -39,12 +39,15 @@ export const createUserProfile = async (
     }
   }
 
+  // Assign role based on UID
+  const userRole = userAuth.uid === 'PLilMKBPuvQRn9pwbpnTWDKXj7Q2' ? 'admin' : 'user';
+
   const newUserProfile: Omit<UserProfile, 'uid'> = {
     email: userAuth.email,
     username: options?.username || userAuth.displayName || userAuth.email,
     currentBalance: 0,
     lifetimeEarnings: 0,
-    role: 'user',
+    role: userRole,
     joinDate: serverTimestamp() as any,
     status: 'active',
     referralCode: generateReferralCode(),

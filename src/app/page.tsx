@@ -1,3 +1,5 @@
+'use server';
+
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Hero } from '@/components/home/hero';
@@ -21,7 +23,7 @@ const zeroStats = {
 async function getHomepageStats() {
     try {
         if (!adminDb) {
-             console.error("Firebase Admin DB is not initialized. Check your service account key in .env.local.");
+             console.error("Firebase Admin DB is not initialized. Check your FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 in .env.local.");
              return zeroStats;
         }
 
@@ -48,7 +50,7 @@ async function getHomepageStats() {
         };
     } catch (error: any) {
         console.error("Error fetching homepage stats:", error.message);
-        // In case of any Firebase error during fetch (including initialization), return zeroed stats.
+        // In case of any Firebase error during fetch, return zeroed stats.
         return zeroStats;
     }
 }

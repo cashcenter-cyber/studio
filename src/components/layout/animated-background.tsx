@@ -132,7 +132,8 @@ const AnimatedBackground = () => {
                     src="/big_2.png" 
                     alt="Floating element 2" 
                     width={400} 
-                    height={400} 
+                    height={400}
+                    priority 
                     className="absolute bottom-[15%] w-80 h-80 opacity-20 animate-float-delay"
                 />
                  <Image 

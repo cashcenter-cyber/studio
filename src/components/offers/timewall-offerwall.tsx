@@ -23,7 +23,7 @@ export function TimewallOfferwall() {
 
   // Timewall's iframe URL. The user ID is passed to identify the user.
   // The postback URL is configured in your Timewall dashboard.
-  const iframeUrl = `https://timewall.io/users/dashboard?app_id=${TIMEWALL_APP_ID}&user_id=${user.uid}`;
+  const iframeUrl = `https://timewall.io/users/login?oid=${TIMEWALL_APP_ID}&uid=${user.uid}`;
 
   return (
     <GlassCard className="w-full">

@@ -41,7 +41,8 @@ export const createUserProfile = async (
   
   const userRole = 'user';
 
-  const newUserProfile: Omit<UserProfile, 'uid'> = {
+  const newUserProfile: UserProfile = {
+    uid: userAuth.uid, // Add uid to the profile data itself
     email: userAuth.email,
     username: options?.username || userAuth.displayName || userAuth.email,
     currentBalance: 0,

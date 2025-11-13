@@ -19,6 +19,8 @@ const zeroStats = {
 };
 
 async function getHomepageStats() {
+    // This check is now removed to allow stats fetching.
+    // The dotenv config in next.config.ts should ensure adminDb is initialized.
     if (!adminDb) {
         console.warn("Firebase Admin DB is not initialized. Check your FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 in .env.local.");
         return zeroStats;

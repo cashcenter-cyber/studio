@@ -5,7 +5,6 @@ import type { UserProfile } from './types';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 
-// Simple function to generate a random string for referral codes
 const generateReferralCode = (length: number = 8) => {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let result = '';
@@ -24,13 +23,12 @@ export const createUserProfile = async (
   db: Firestore, 
   userAuth: User, 
   options: CreateUserOptions | null = { username: null }
-) => {
+): Promise<void> => {
   if (!userAuth) throw new Error("User object is missing.");
 
   const userRef = doc(db, 'users', userAuth.uid);
   let referredBy = null;
 
-  // If a referral code is provided, find the referring user
   if (options?.referralCode) {
     const usersRef = collection(db, 'users');
     const q = query(usersRef, where('referralCode', '==', options.referralCode), limit(1));
@@ -40,9 +38,8 @@ export const createUserProfile = async (
       referredBy = referringUserDoc.id;
     }
   }
-
-  // Assign role based on UID
-  const userRole = userAuth.uid === 'PLilMKBPuvQRn9pwbpnTWDKXj7Q2' ? 'admin' : 'user';
+  
+  const userRole = 'user';
 
   const newUserProfile: Omit<UserProfile, 'uid'> = {
     email: userAuth.email,
@@ -58,19 +55,15 @@ export const createUserProfile = async (
     referralEarnings: 0
   };
 
-  // Use non-blocking write with contextual error handling
-  setDoc(userRef, newUserProfile)
-    .catch((serverError) => {
+  try {
+    await setDoc(userRef, newUserProfile);
+  } catch (serverError: any) {
       const permissionError = new FirestorePermissionError({
         path: userRef.path,
         operation: 'create',
         requestResourceData: newUserProfile,
       });
-      // Emit the error with the global error emitter
       errorEmitter.emit('permission-error', permissionError);
-
-      // We can also re-throw a more user-friendly error if needed, but the primary
-      // mechanism for developers is the emitted error.
-      throw new Error('Failed to create user profile in database.');
-    });
+      throw permissionError;
+  }
 };

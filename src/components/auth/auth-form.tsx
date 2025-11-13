@@ -8,6 +8,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   createUserWithEmailAndPassword,
+  signOut,
 } from 'firebase/auth';
 import { initiateEmailSignIn } from '@/firebase/non-blocking-login';
 import { useAuthService } from '@/firebase';
@@ -73,18 +74,19 @@ export function AuthForm() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
-      // Check if the user document already exists in Firestore
       const userDocRef = doc(db, 'users', user.uid);
       const userDoc = await getDoc(userDocRef);
 
       if (!userDoc.exists()) {
-        // This is a new user, create their profile
         await createUserProfile(db, user);
       }
       
       handleAuthSuccess();
-    } catch (error) {
-      handleAuthError(error);
+    } catch (error: any) {
+        handleAuthError(error);
+        if (auth.currentUser) {
+            await signOut(auth);
+        }
     } finally {
       setLoading(false);
     }
@@ -99,7 +101,6 @@ export function AuthForm() {
     const onSubmit = (values: z.infer<typeof loginSchema>) => {
       setLoading(true);
       initiateEmailSignIn(auth, values.email, values.password);
-      // Non-blocking, relying on AuthProvider's onAuthStateChanged
     };
 
     return (
@@ -126,12 +127,14 @@ export function AuthForm() {
       const onSubmit = async (values: z.infer<typeof signUpSchema>) => {
         setLoading(true);
         try {
-          // This part has to be blocking to ensure profile is created before redirect
           const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
           await createUserProfile(db, userCredential.user, { username: values.username, referralCode: values.referralCode });
           handleAuthSuccess();
         } catch (error: any) {
           handleAuthError(error);
+          if (auth.currentUser) {
+            await signOut(auth);
+          }
         } finally {
           setLoading(false);
         }

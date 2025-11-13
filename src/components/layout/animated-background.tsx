@@ -119,7 +119,7 @@ const AnimatedBackground = () => {
             className="absolute top-0 left-0 w-full h-full transition-opacity duration-500"
             style={style}
         />
-         {isDark && (
+         {mounted && isDark && (
             <>
                 <Image 
                     src="/big_1.png" 

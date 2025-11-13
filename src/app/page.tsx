@@ -11,8 +11,6 @@ import { DollarSign, Users, CheckCircle, Gift } from 'lucide-react';
 import { adminDb } from '@/lib/firebase/admin';
 import { collection, getDocs, query, where, getCountFromServer, collectionGroup } from 'firebase/firestore';
 
-export const dynamic = 'force-dynamic';
-
 const zeroStats = {
     totalPaidOut: 0,
     userCount: 0,
@@ -22,7 +20,7 @@ const zeroStats = {
 
 async function getHomepageStats() {
     if (!adminDb) {
-        console.error("Firebase Admin DB is not initialized. Check your FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 in .env.local.");
+        console.warn("Firebase Admin DB is not initialized. Check your FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 in .env.local.");
         return zeroStats;
     }
 

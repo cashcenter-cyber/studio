@@ -8,10 +8,10 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
   signOut,
 } from 'firebase/auth';
-import { initiateEmailSignIn } from '@/firebase/non-blocking-login';
-import { useAuthService } from '@/firebase';
+import { useAuthService, useFirestore } from '@/firebase';
 import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
@@ -29,7 +29,6 @@ import { useToast } from '@/hooks/use-toast';
 import { createUserProfile } from '@/lib/firestore';
 import { Loader2 } from 'lucide-react';
 import { getDoc, doc } from 'firebase/firestore';
-import { useFirestore } from '@/firebase';
 
 
 const signUpSchema = z.object({
@@ -98,9 +97,16 @@ export function AuthForm() {
       defaultValues: { email: '', password: '' },
     });
 
-    const onSubmit = (values: z.infer<typeof loginSchema>) => {
+    const onSubmit = async (values: z.infer<typeof loginSchema>) => {
       setLoading(true);
-      initiateEmailSignIn(auth, values.email, values.password);
+      try {
+        await signInWithEmailAndPassword(auth, values.email, values.password);
+        handleAuthSuccess();
+      } catch (error) {
+        handleAuthError(error);
+      } finally {
+        setLoading(false);
+      }
     };
 
     return (

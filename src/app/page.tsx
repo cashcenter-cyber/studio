@@ -11,36 +11,45 @@ import { collection, getDocs, query, where, getCountFromServer, collectionGroup 
 
 export const dynamic = 'force-dynamic';
 
+const zeroStats = {
+    totalPaidOut: 0,
+    userCount: 0,
+    offersCompleted: 0,
+    availableOffers: 0,
+};
+
 async function getHomepageStats() {
-    if (!adminDb) {
-        return {
-            totalPaidOut: 0,
-            userCount: 0,
-            offersCompleted: 0,
-            availableOffers: 0,
+    try {
+        if (!adminDb) {
+             console.error("Firebase Admin DB is not initialized. Check your service account key in .env.local.");
+             return zeroStats;
         }
-    }
-    
-    const usersSnapshot = await getCountFromServer(collection(adminDb, 'users'));
-    const userCount = usersSnapshot.data().count;
 
-    const payoutsQuery = query(collection(adminDb, 'payouts'), where('status', '==', 'approved'));
-    const payoutsSnapshot = await getDocs(payoutsQuery);
-    const totalPaidOut = payoutsSnapshot.docs.reduce((sum, doc) => sum + doc.data().amount, 0);
+        const usersSnapshot = await getCountFromServer(collection(adminDb, 'users'));
+        const userCount = usersSnapshot.data().count;
 
-    const transactionsQuery = query(collectionGroup(adminDb, 'transactions'), where('type', '==', 'earn'));
-    const transactionsSnapshot = await getCountFromServer(transactionsQuery);
-    const offersCompleted = transactionsSnapshot.data().count;
+        const payoutsQuery = query(collection(adminDb, 'payouts'), where('status', '==', 'approved'));
+        const payoutsSnapshot = await getDocs(payoutsQuery);
+        const totalPaidOut = payoutsSnapshot.docs.reduce((sum, doc) => sum + doc.data().amount, 0);
 
-    const offersQuery = query(collection(adminDb, 'offers'), where('status', '==', 'active'));
-    const offersSnapshot = await getCountFromServer(offersQuery);
-    const availableOffers = offersSnapshot.data().count;
+        const transactionsQuery = query(collectionGroup(adminDb, 'transactions'), where('type', '==', 'earn'));
+        const transactionsSnapshot = await getCountFromServer(transactionsQuery);
+        const offersCompleted = transactionsSnapshot.data().count;
 
-    return {
-        totalPaidOut,
-        userCount,
-        offersCompleted,
-        availableOffers,
+        const offersQuery = query(collection(adminDb, 'offers'), where('status', '==', 'active'));
+        const offersSnapshot = await getCountFromServer(offersQuery);
+        const availableOffers = offersSnapshot.data().count;
+
+        return {
+            totalPaidOut,
+            userCount,
+            offersCompleted,
+            availableOffers,
+        };
+    } catch (error: any) {
+        console.error("Error fetching homepage stats:", error.message);
+        // In case of any Firebase error during fetch (including initialization), return zeroed stats.
+        return zeroStats;
     }
 }
 

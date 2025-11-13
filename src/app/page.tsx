@@ -21,12 +21,12 @@ const zeroStats = {
 };
 
 async function getHomepageStats() {
-    try {
-        if (!adminDb) {
-             console.error("Firebase Admin DB is not initialized. Check your FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 in .env.local.");
-             return zeroStats;
-        }
+    if (!adminDb) {
+        console.error("Firebase Admin DB is not initialized. Check your FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 in .env.local.");
+        return zeroStats;
+    }
 
+    try {
         const usersSnapshot = await getCountFromServer(collection(adminDb, 'users'));
         const userCount = usersSnapshot.data().count;
 

@@ -17,11 +17,18 @@ export default function DashboardLayout({
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !user) {
+    // Ne rien faire tant que l'état d'authentification est en cours de chargement.
+    if (loading) {
+      return;
+    }
+    // Une fois le chargement terminé, si l'utilisateur n'est pas connecté, rediriger.
+    if (!user) {
       router.push('/auth');
     }
   }, [user, loading, router]);
 
+  // Affiche l'écran de chargement si l'authentification est en cours
+  // OU si l'utilisateur n'est pas encore chargé (évite un flash de contenu).
   if (loading || !user) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
@@ -33,6 +40,7 @@ export default function DashboardLayout({
     );
   }
 
+  // Si le chargement est terminé et que l'utilisateur est bien connecté, affiche le tableau de bord.
   return (
     <div className="min-h-screen w-full flex flex-col">
       <Header />

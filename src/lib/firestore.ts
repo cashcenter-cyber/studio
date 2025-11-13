@@ -2,6 +2,8 @@
 import { doc, setDoc, serverTimestamp, Firestore, collection, query, where, getDocs, limit } from 'firebase/firestore';
 import type { User } from 'firebase/auth';
 import type { UserProfile } from './types';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 // Simple function to generate a random string for referral codes
 const generateReferralCode = (length: number = 8) => {
@@ -56,11 +58,19 @@ export const createUserProfile = async (
     referralEarnings: 0
   };
 
-  try {
-    await setDoc(userRef, newUserProfile);
-  } catch (error) {
-    console.error('Error creating user profile in Firestore:', error);
-    // Re-throw the error to be caught by the caller
-    throw new Error('Failed to create user profile in database.');
-  }
+  // Use non-blocking write with contextual error handling
+  setDoc(userRef, newUserProfile)
+    .catch((serverError) => {
+      const permissionError = new FirestorePermissionError({
+        path: userRef.path,
+        operation: 'create',
+        requestResourceData: newUserProfile,
+      });
+      // Emit the error with the global error emitter
+      errorEmitter.emit('permission-error', permissionError);
+
+      // We can also re-throw a more user-friendly error if needed, but the primary
+      // mechanism for developers is the emitted error.
+      throw new Error('Failed to create user profile in database.');
+    });
 };

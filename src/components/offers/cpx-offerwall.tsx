@@ -4,6 +4,7 @@ import { useUser } from '@/firebase';
 import { Loader2 } from 'lucide-react';
 import { GlassCard } from '../ui/glass-card';
 
+// Les variables sont maintenant directement disponibles grâce à la configuration de next.config.ts
 const CPX_APP_ID = process.env.NEXT_PUBLIC_CPX_APP_ID;
 const CPX_IFRAME_HASH = process.env.NEXT_PUBLIC_CPX_IFRAME_HASH;
 

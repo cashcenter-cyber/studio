@@ -4,6 +4,7 @@ import { useUser } from '@/firebase';
 import { Loader2 } from 'lucide-react';
 import { GlassCard } from '../ui/glass-card';
 
+// La variable est maintenant directement disponible grâce à la configuration de next.config.ts
 const TIMEWALL_APP_ID = process.env.NEXT_PUBLIC_TIMEWALL_APP_ID;
 
 export function TimewallOfferwall() {

@@ -16,12 +16,18 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Invalid token' }, { status: 403 });
   }
   
-  const TIMEWALL_API_KEY = process.env.TIMEWALL_API_KEY;
+  // Correctly use the environment variables exposed via next.config.js
+  const TIMEWALL_API_KEY = process.env.NEXT_PUBLIC_TIMEWALL_APP_ID;
   const TIMEWALL_SECRET_KEY = process.env.TIMEWALL_SECRET_KEY;
   
-  if (!TIMEWALL_API_KEY || !TIMEWALL_SECRET_KEY) {
-      console.error('Timewall environment variables not set');
-      return NextResponse.json({ error: 'Timewall integration is not configured correctly on the server.' }, { status: 500 });
+  if (!TIMEWALL_API_KEY) {
+      console.error('Timewall Error: NEXT_PUBLIC_TIMEWALL_APP_ID is not set in environment variables.');
+      return NextResponse.json({ error: 'Timewall integration is missing APP_ID configuration on the server.' }, { status: 500 });
+  }
+
+  if (!TIMEWALL_SECRET_KEY) {
+      console.error('Timewall Error: TIMEWALL_SECRET_KEY is not set in environment variables.');
+      return NextResponse.json({ error: 'Timewall integration is missing SECRET_KEY configuration on the server.' }, { status: 500 });
   }
   
   try {

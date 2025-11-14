@@ -1,3 +1,4 @@
+
 import admin from 'firebase-admin';
 import type { DecodedIdToken } from 'firebase-admin/auth';
 
@@ -6,26 +7,27 @@ let adminDb: admin.firestore.Firestore | null = null;
 
 try {
   const serviceAccountKeyBase64 = process.env.FIREBASE_SERVICE_ACCOUNT_KEY_BASE64;
-  
-  // Clean the Base64 string to remove potential newline characters
-  const cleanedServiceAccountKeyBase64 = serviceAccountKeyBase64?.replace(/\\n/g, '');
 
-  const serviceAccountKey = cleanedServiceAccountKeyBase64
-    ? Buffer.from(cleanedServiceAccountKeyBase64, 'base64').toString('utf-8')
-    : '';
-
-  if (!serviceAccountKey) {
+  if (!serviceAccountKeyBase64) {
     console.warn("FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 is not set. Firebase Admin SDK will not be initialized on the server.");
-  } else if (!admin.apps.length) {
-    admin.initializeApp({
-      credential: admin.credential.cert(JSON.parse(serviceAccountKey)),
-    });
-    adminAuth = admin.auth();
-    adminDb = admin.firestore();
   } else {
-    // Re-use existing app instance
-    adminAuth = admin.auth();
-    adminDb = admin.firestore();
+    // Decode the Base64 string into a raw JSON string
+    const serviceAccountJson = Buffer.from(serviceAccountKeyBase64, 'base64').toString('utf-8');
+
+    // Robustly clean the JSON string to remove any potential control characters or invalid whitespace
+    const cleanedJson = serviceAccountJson.replace(/[\x00-\x1F\x7F-\x9F]/g, "").trim();
+
+    if (!admin.apps.length) {
+      admin.initializeApp({
+        credential: admin.credential.cert(JSON.parse(cleanedJson)),
+      });
+      adminAuth = admin.auth();
+      adminDb = admin.firestore();
+    } else {
+      // Re-use existing app instance
+      adminAuth = admin.auth();
+      adminDb = admin.firestore();
+    }
   }
 } catch (error: any) {
   console.error('Firebase admin initialization error:', error.message);

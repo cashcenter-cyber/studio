@@ -42,7 +42,6 @@ export function Header() {
     { href: '/dashboard/offers', label: 'Offers', icon: Wallet },
     { href: '/dashboard/rewards', label: 'Rewards', icon: Gift },
     { href: '/dashboard/leaderboards', label: 'Leaderboards', icon: Trophy },
-    { href: '/dashboard/chat', label: 'Chat', icon: MessageSquare },
   ];
 
   const commonNavItems = [

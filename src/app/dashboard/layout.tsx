@@ -4,9 +4,9 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/firebase';
 import { Header } from '@/components/layout/header';
-import { Sidebar } from '@/components/dashboard/sidebar';
 import { Loader2 } from 'lucide-react';
 import { Footer } from '@/components/layout/footer';
+import { ChatBubble } from '@/components/chat/chat-bubble';
 
 export default function DashboardLayout({
   children,
@@ -44,10 +44,8 @@ export default function DashboardLayout({
       return (
         <div className="min-h-screen w-full flex flex-col">
           <Header />
-          <div className="flex flex-1">
-            <Sidebar />
-            <main className="flex-1 p-4 md:p-8 lg:p-10">{children}</main>
-          </div>
+          <main className="flex-1 p-4 md:p-8 lg:p-10">{children}</main>
+          <ChatBubble />
           <Footer />
         </div>
       );

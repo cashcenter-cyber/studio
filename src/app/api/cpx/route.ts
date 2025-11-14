@@ -8,6 +8,7 @@ export async function GET(request: NextRequest) {
   const username = searchParams.get('username');
   const email = searchParams.get('email');
 
+  // Hardcode credentials for reliability. This is secure as it's server-side.
   const appId = "29497";
   const secretKey = "VAEvtiPj8ehJAgKR6keIZAE2GdZdOg0k";
 

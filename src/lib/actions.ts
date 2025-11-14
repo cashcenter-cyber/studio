@@ -229,7 +229,7 @@ export async function getTimewallUrlAction(userId: string) {
     try {
         const hashString = userId + TIMEWALL_SECRET_KEY;
         const hash = createHash('sha256').update(hashString).digest('hex');
-        const url = `https://timewall.com/users/login?app=${TIMEWALL_API_KEY}&user=${userId}&hash=${hash}`;
+        const url = `https://offers.timewall.io/login?app=${TIMEWALL_API_KEY}&user=${userId}&hash=${hash}`;
         
         return { success: true, url };
     } catch (error: any) {

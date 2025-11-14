@@ -211,38 +211,3 @@ export async function updateUsernameAction(formData: FormData, token: string | u
         return { success: false, error: error.message || 'Failed to update username.' };
     }
 }
-
-export async function getTimewallUrlAction(userId: string) {
-    const appId = 'e97ac5e4eb1ca52d';
-    const baseUrl = 'https://timewall.io/users/login';
-    const finalUrl = `${baseUrl}?app=${appId}&user=${userId}`;
-    return { success: true, url: finalUrl };
-}
-
-export async function getCpxUrlAction(
-    userId: string,
-    username: string,
-    email: string
-  ) {
-    const appId = "29497";
-    const secretKey = "VAEvtiPj8ehJAgKR6keIZAE2GdZdOg0k";
-
-    if (!appId || !secretKey) {
-        const errorMsg = "CPX Configuration Error: App ID or Secret Key is not set on the server.";
-        console.error(errorMsg);
-        return { success: false, error: errorMsg };
-    }
-  
-    const hash = createHash('sha1').update(`${userId}-${secretKey}`).digest('hex');
-  
-    const url = new URL('https://offers.cpx-research.com/index.php');
-    url.searchParams.append('app_id', appId);
-    url.searchParams.append('ext_user_id', userId);
-    url.searchParams.append('secure_hash', hash);
-    url.searchParams.append('username', username);
-    url.searchParams.append('email', email);
-    url.searchParams.append('subid_1', '');
-    url.searchParams.append('subid_2', '');
-  
-    return { success: true, url: url.toString() };
-  }

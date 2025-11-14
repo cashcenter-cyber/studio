@@ -5,7 +5,6 @@ import { useUser } from '@/firebase';
 import { Loader2 } from 'lucide-react';
 import { GlassCard } from '../ui/glass-card';
 import { useEffect, useState } from 'react';
-import { getCpxUrlAction } from '@/lib/actions';
 
 export function CpxOfferwall() {
   const { user, userProfile } = useUser();
@@ -16,17 +15,28 @@ export function CpxOfferwall() {
     if (user && userProfile) {
       const fetchCpxUrl = async () => {
         try {
-          const result = await getCpxUrlAction(
-            user.uid,
-            userProfile.username || 'user',
-            user.email || ''
-          );
-          if (result.success && result.url) {
-            setIframeUrl(result.url);
-          } else {
-            // Set the error state with the message from the server action
-            setError(result.error || 'Failed to get CPX URL. The server did not provide a reason.');
+          // Construct the query parameters to send to our new API route
+          const params = new URLSearchParams({
+            userId: user.uid,
+            username: userProfile.username || 'user',
+            email: user.email || '',
+          });
+
+          // Fetch the secure URL from our own API endpoint
+          const response = await fetch(`/api/cpx?${params.toString()}`);
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || `Failed to fetch CPX URL. Status: ${response.status}`);
           }
+          
+          const data = await response.json();
+          if (data.url) {
+            setIframeUrl(data.url);
+          } else {
+            throw new Error('API did not return a URL.');
+          }
+
         } catch (err: any) {
           console.error('CPX Offerwall Client Error:', err);
           setError(err.message || 'Could not load the offerwall due to a client-side error.');

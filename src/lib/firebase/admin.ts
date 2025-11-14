@@ -5,8 +5,13 @@ let adminAuth: admin.auth.Auth | null = null;
 let adminDb: admin.firestore.Firestore | null = null;
 
 try {
-  const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY_BASE64
-    ? Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_KEY_BASE64, 'base64').toString('utf-8')
+  const serviceAccountKeyBase64 = process.env.FIREBASE_SERVICE_ACCOUNT_KEY_BASE64;
+  
+  // Clean the Base64 string to remove potential newline characters
+  const cleanedServiceAccountKeyBase64 = serviceAccountKeyBase64?.replace(/\\n/g, '');
+
+  const serviceAccountKey = cleanedServiceAccountKeyBase64
+    ? Buffer.from(cleanedServiceAccountKeyBase64, 'base64').toString('utf-8')
     : '';
 
   if (!serviceAccountKey) {

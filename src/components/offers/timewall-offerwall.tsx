@@ -4,7 +4,6 @@ import { useUser } from '@/firebase';
 import { Loader2 } from 'lucide-react';
 import { GlassCard } from '../ui/glass-card';
 
-// La variable est maintenant directement disponible grâce à la configuration de next.config.ts
 const TIMEWALL_APP_ID = process.env.NEXT_PUBLIC_TIMEWALL_APP_ID;
 
 export function TimewallOfferwall() {
@@ -22,9 +21,8 @@ export function TimewallOfferwall() {
     );
   }
 
-  // Timewall's iframe URL. The user ID is passed to identify the user.
-  // The postback URL is configured in your Timewall dashboard.
-  const iframeUrl = `https://timewall.io/users/login?oid=${TIMEWALL_APP_ID}&uid=${user.uid}`;
+  // Correct URL format as per Timewall documentation
+  const iframeUrl = `https://timewall.com/users/login?app=${TIMEWALL_APP_ID}&user=${user.uid}`;
 
   return (
     <GlassCard className="w-full">

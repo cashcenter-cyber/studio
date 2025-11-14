@@ -21,14 +21,15 @@ export function CpxOfferwall() {
             userProfile.username || 'user',
             user.email || ''
           );
-          if (result.success) {
+          if (result.success && result.url) {
             setIframeUrl(result.url);
           } else {
-            throw new Error('Failed to get CPX URL from server action.');
+            // Set the error state with the message from the server action
+            setError(result.error || 'Failed to get CPX URL. The server did not provide a reason.');
           }
-        } catch (err) {
-          console.error('CPX Offerwall Error:', err);
-          setError('Could not load the offerwall. Please try again later.');
+        } catch (err: any) {
+          console.error('CPX Offerwall Client Error:', err);
+          setError(err.message || 'Could not load the offerwall due to a client-side error.');
         }
       };
 
@@ -37,7 +38,17 @@ export function CpxOfferwall() {
   }, [user, userProfile]);
 
   if (error) {
-    return <div className="text-destructive p-4 glass-card">{error}</div>;
+    return (
+        <GlassCard className="p-4 text-center">
+            <h3 className="text-lg font-semibold text-destructive">Failed to Load Offerwall</h3>
+            <p className="text-sm text-muted-foreground mt-2">
+                There was a problem loading offers from CPX Research. Please try again later.
+            </p>
+            <p className="text-xs text-muted-foreground/50 mt-4 font-mono">
+                Error: {error}
+            </p>
+        </GlassCard>
+    );
   }
 
   if (!user || !iframeUrl) {

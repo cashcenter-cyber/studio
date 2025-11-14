@@ -226,8 +226,13 @@ export async function getCpxUrlAction(
   ) {
     const appId = "29497";
     const secretKey = "VAEvtiPj8ehJAgKR6keIZAE2GdZdOg0k";
+
+    if (!appId || !secretKey) {
+        const errorMsg = "CPX Configuration Error: App ID or Secret Key is not set on the server.";
+        console.error(errorMsg);
+        return { success: false, error: errorMsg };
+    }
   
-    // As per most hash-based integrations, the hash is usually created from the user ID and the secret key.
     const hash = createHash('sha1').update(`${userId}-${secretKey}`).digest('hex');
   
     const url = new URL('https://offers.cpx-research.com/index.php');
@@ -236,7 +241,6 @@ export async function getCpxUrlAction(
     url.searchParams.append('secure_hash', hash);
     url.searchParams.append('username', username);
     url.searchParams.append('email', email);
-    // You can add subid parameters if you need them for tracking
     url.searchParams.append('subid_1', '');
     url.searchParams.append('subid_2', '');
   

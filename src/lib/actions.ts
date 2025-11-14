@@ -211,19 +211,3 @@ export async function updateUsernameAction(formData: FormData, token: string | u
         return { success: false, error: error.message || 'Failed to update username.' };
     }
 }
-
-export async function getTimewallUrlAction(userId: string) {
-    const TIMEWALL_API_KEY = process.env.NEXT_PUBLIC_TIMEWALL_APP_ID;
-
-    if (!TIMEWALL_API_KEY) {
-        console.error('Timewall Action Error: NEXT_PUBLIC_TIMEWALL_APP_ID is not set.');
-        return { success: false, error: 'Timewall integration is not configured correctly on the server (missing API_KEY).' };
-    }
-    
-    // Using the exact URL structure provided by the user.
-    // oid = Your App ID (API Key)
-    // uid = The user's ID in your system
-    const url = `https://timewall.io/users/login?oid=${TIMEWALL_API_KEY}&uid=${userId}`;
-    
-    return { success: true, url };
-}

@@ -29,13 +29,11 @@ export const useUserAuthState = (auth: Auth | null, firestore: Firestore | null)
       return;
     }
 
+    // This handles the primary authentication state.
     const authUnsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
-      if (!firebaseUser) {
-        // Not logged in
-        setUserProfile(null);
-        setIsUserLoading(false);
-      }
+      // Once auth state is determined, the primary loading is done.
+      setIsUserLoading(false); 
     }, (error) => {
       console.error("useUserAuthState: Auth state error:", error);
       setUserError(error);
@@ -47,31 +45,30 @@ export const useUserAuthState = (auth: Auth | null, firestore: Firestore | null)
 
   useEffect(() => {
     if (!firestore || !user) {
-      // If there's no user, no profile to fetch.
-      // isUserLoading is controlled by the auth state change.
-      return;
+        // If there is no user, or firestore is not ready, clear profile.
+        setUserProfile(null);
+        return;
     }
 
-    setIsUserLoading(true); // Start loading profile data
+    // Fetch user profile data. This does not set isUserLoading.
     const profileDocRef = doc(firestore, 'users', user.uid);
     
     const profileUnsubscribe = onSnapshot(profileDocRef, (doc) => {
       if (doc.exists()) {
         setUserProfile({ uid: doc.id, ...doc.data() } as UserProfile);
       } else {
-        // This might happen briefly after signup before profile is created.
         setUserProfile(null); 
       }
-      setIsUserLoading(false);
     }, (error) => {
       console.error("useUserAuthState: Profile snapshot error:", error);
+      // We can set a userError here, but we won't block the UI with a loader.
       setUserError(error);
-      setIsUserLoading(false);
+      setUserProfile(null);
     });
 
     return () => profileUnsubscribe();
 
-  }, [user, firestore]); // Rerun when the user object or firestore instance changes.
+  }, [user, firestore]); // Rerun only when the user object or firestore instance changes.
 
   return { user, userProfile, isUserLoading, userError };
 };

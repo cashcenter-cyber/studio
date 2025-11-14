@@ -214,11 +214,11 @@ export async function updateUsernameAction(formData: FormData, token: string | u
 
 export async function getTimewallUrlAction(userId: string) {
     const TIMEWALL_API_KEY = process.env.NEXT_PUBLIC_TIMEWALL_APP_ID;
-    const TIMEWALL_SECRET_KEY = process.env.TIMEWALL_SECRET_KEY;
+    const TIMEWALL_SECRET_KEY = "c68c29bfbae761006c9e1975bfcef1b1";
 
     if (!TIMEWALL_API_KEY) {
         console.error('Timewall Action Error: NEXT_PUBLIC_TIMEWALL_APP_ID is not set.');
-        return { success: false, error: 'Timewall integration is not configured correctly on the server (missing APP_ID).' };
+        return { success: false, error: 'Timewall integration is not configured correctly on the server (missing API_KEY).' };
     }
 
     if (!TIMEWALL_SECRET_KEY) {

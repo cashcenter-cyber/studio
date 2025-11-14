@@ -1,5 +1,5 @@
 // @ts-check
-require('dotenv').config({ path: './.env.local' });
+
 /** @type {import('next').NextConfig} */
 
 import type {NextConfig} from 'next';

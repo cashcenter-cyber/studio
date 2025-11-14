@@ -13,6 +13,7 @@
  * - /payouts/{payoutId}: Root collection for all user payout requests for admin processing.
  * - /offers/{offerId}: Stores all available offers.
  * - /roles_admin/{userId}: Used to assign global admin role.
+ * - /chat_messages/{messageId}: Stores all messages for the general chat.
  */
 rules_version = '2';
 service cloud.firestore {
@@ -70,6 +71,19 @@ service cloud.firestore {
      */
     match /roles_admin/{userId} {
       allow get, list, write: if isAdmin();
+    }
+
+    /**
+     * @description General chat messages. Any signed-in user can read and create messages.
+     * Users cannot edit or delete any messages.
+     */
+    match /chat_messages/{messageId} {
+      allow list, get: if isSignedIn();
+      allow create: if isSignedIn() 
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.text.size() > 0 
+                    && request.resource.data.text.size() < 280;
+      allow update, delete: if false;
     }
 
     // Helper functions

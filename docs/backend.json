@@ -156,6 +156,21 @@
         "offerUrl": { "type": "string", "format": "uri", "description": "The URL the user is sent to to complete the offer." }
       },
       "required": ["id", "name", "reward", "category", "partner", "imageUrl", "status", "offerUrl"]
+    },
+    "ChatMessage": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Chat Message",
+      "type": "object",
+      "description": "Represents a single message in the general chat.",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier for the message." },
+        "text": { "type": "string", "description": "The content of the message." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp of when the message was sent." },
+        "userId": { "type": "string", "description": "The UID of the user who sent the message." },
+        "username": { "type": "string", "description": "The username of the user who sent the message." },
+        "profilePicture": { "type": "string", "format": "uri", "description": "URL of the user's profile picture." }
+      },
+      "required": ["id", "text", "createdAt", "userId", "username"]
     }
   },
   "auth": {
@@ -221,6 +236,15 @@
         "path": "/dashboard/leaderboards",
         "definition": {
           "description": "Page to display user leaderboards for monthly and all-time earnings."
+        }
+      },
+      {
+        "path": "/chat_messages/{messageId}",
+        "definition": {
+          "entityName": "ChatMessage",
+          "schema": { "$ref": "#/backend/entities/ChatMessage" },
+          "description": "Stores all messages for the general chat. Publicly readable by authenticated users.",
+          "params": [{ "name": "messageId", "description": "The unique identifier for the chat message." }]
         }
       }
     ],

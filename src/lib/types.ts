@@ -68,3 +68,12 @@ export interface OfferwallTransaction {
     offerId: string;
     offerName?: string;
 }
+
+export interface ChatMessage {
+    id: string;
+    text: string;
+    createdAt: Timestamp;
+    userId: string;
+    username: string;
+    profilePicture?: string;
+}

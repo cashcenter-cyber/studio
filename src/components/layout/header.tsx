@@ -12,6 +12,7 @@ import {
   Wallet,
   Gift,
   Trophy,
+  MessageSquare,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
@@ -41,6 +42,7 @@ export function Header() {
     { href: '/dashboard/offers', label: 'Offers', icon: Wallet },
     { href: '/dashboard/rewards', label: 'Rewards', icon: Gift },
     { href: '/dashboard/leaderboards', label: 'Leaderboards', icon: Trophy },
+    { href: '/dashboard/chat', label: 'Chat', icon: MessageSquare },
   ];
 
   const commonNavItems = [

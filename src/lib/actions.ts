@@ -5,6 +5,7 @@ import { adminDb, verifyIdToken } from './firebase/admin'
 import { collection, doc, updateDoc, getDoc, serverTimestamp, addDoc, deleteDoc } from 'firebase/firestore'
 import type { Payout, UserProfile, Offer } from './types'
 import { revalidatePath } from 'next/cache'
+import { createHash } from 'crypto'
 
 const payoutSchema = z.object({
   amount: z.coerce.number().min(1000),
@@ -207,5 +208,31 @@ export async function updateUsernameAction(formData: FormData, token: string | u
         return { success: true };
     } catch (error: any) {
         return { success: false, error: error.message || 'Failed to update username.' };
+    }
+}
+
+export async function getTimewallUrlAction(userId: string) {
+    const TIMEWALL_API_KEY = process.env.NEXT_PUBLIC_TIMEWALL_APP_ID;
+    const TIMEWALL_SECRET_KEY = process.env.TIMEWALL_SECRET_KEY;
+
+    if (!TIMEWALL_API_KEY) {
+        console.error('Timewall Action Error: NEXT_PUBLIC_TIMEWALL_APP_ID is not set.');
+        return { success: false, error: 'Timewall integration is not configured correctly on the server (missing APP_ID).' };
+    }
+
+    if (!TIMEWALL_SECRET_KEY) {
+        console.error('Timewall Action Error: TIMEWALL_SECRET_KEY is not set.');
+        return { success: false, error: 'Timewall integration is not configured correctly on the server (missing SECRET_KEY).' };
+    }
+
+    try {
+        const hashString = userId + TIMEWALL_SECRET_KEY;
+        const hash = createHash('sha256').update(hashString).digest('hex');
+        const url = `https://timewall.com/users/login?app=${TIMEWALL_API_KEY}&user=${userId}&hash=${hash}`;
+        
+        return { success: true, url };
+    } catch (error: any) {
+        console.error('Error generating Timewall URL:', error);
+        return { success: false, error: 'Internal Server Error while generating Timewall URL.' };
     }
 }

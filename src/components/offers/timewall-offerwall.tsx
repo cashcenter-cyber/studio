@@ -3,52 +3,44 @@
 import { useUser } from '@/firebase';
 import { Loader2 } from 'lucide-react';
 import { GlassCard } from '../ui/glass-card';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { getTimewallUrlAction } from '@/lib/actions';
 
 export function TimewallOfferwall() {
   const { user } = useUser();
   const [iframeUrl, setIframeUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
     if (user) {
-      const fetchTimewallUrl = async () => {
-        try {
-          const token = await user.getIdToken();
-          const response = await fetch('/api/timewall-url', {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          });
-
-          if (!response.ok) {
-            throw new Error('Failed to get Timewall URL');
-          }
-
-          const data = await response.json();
-          setIframeUrl(data.url);
-        } catch (error) {
-          console.error(error);
+      startTransition(async () => {
+        setLoading(true);
+        const result = await getTimewallUrlAction(user.uid);
+        
+        if (result.success && result.url) {
+          setIframeUrl(result.url);
+          setError(null);
+        } else {
+          setError(result.error || 'Failed to get Timewall URL');
           toast({
             variant: 'destructive',
             title: 'Error',
-            description: 'Could not load Timewall offerwall. Please try again later.',
+            description: result.error || 'Could not load Timewall offerwall. Please try again later.',
           });
-        } finally {
-          setLoading(false);
         }
-      };
-
-      fetchTimewallUrl();
-    } else {
         setLoading(false);
+      });
+    } else {
+      setLoading(false);
     }
   }, [user, toast]);
 
 
-  if (loading || !user) {
+  if (loading || isPending || !user) {
     return (
       <div className="flex items-center justify-center h-96">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -56,10 +48,10 @@ export function TimewallOfferwall() {
     );
   }
   
-  if (!iframeUrl) {
+  if (error || !iframeUrl) {
     return (
         <div className="flex items-center justify-center h-96 glass-card">
-            <p className="text-destructive text-center">Could not load Timewall offerwall.<br />Please check your configuration or contact support.</p>
+            <p className="text-destructive text-center">{error}<br />Please check your configuration or contact support.</p>
         </div>
     )
   }

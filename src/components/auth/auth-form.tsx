@@ -9,7 +9,6 @@ import {
   signInWithPopup,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  signOut,
 } from 'firebase/auth';
 import { useAuthService, useFirestore } from '@/firebase';
 import { useRouter } from 'next/navigation';
@@ -83,9 +82,6 @@ export function AuthForm() {
       handleAuthSuccess();
     } catch (error: any) {
         handleAuthError(error);
-        if (auth.currentUser) {
-            await signOut(auth);
-        }
     } finally {
       setLoading(false);
     }
@@ -138,9 +134,6 @@ export function AuthForm() {
           handleAuthSuccess();
         } catch (error: any) {
           handleAuthError(error);
-          if (auth.currentUser) {
-            await signOut(auth);
-          }
         } finally {
           setLoading(false);
         }

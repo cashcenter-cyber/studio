@@ -5,14 +5,14 @@ import { useUser } from '@/firebase';
 import { Loader2 } from 'lucide-react';
 import { GlassCard } from '../ui/glass-card';
 
-// Les variables sont maintenant directement disponibles grâce à la configuration de next.config.ts
-const TIMEWALL_APP_ID = process.env.NEXT_PUBLIC_TIMEWALL_APP_ID;
+// La clé API publique de Timewall est maintenant codée en dur. C'est sécurisé car c'est une clé publique.
+const TIMEWALL_APP_ID = 'e97ac5e4eb1ca52d';
 
 export function TimewallOfferwall() {
   const { user } = useUser();
 
   if (!TIMEWALL_APP_ID) {
-    return <div className="text-destructive">Timewall is not configured. Please set NEXT_PUBLIC_TIMEWALL_APP_ID in your environment variables.</div>;
+    return <div className="text-destructive">Timewall is not configured. The App ID is missing.</div>;
   }
   
   if (!user) {
@@ -23,8 +23,8 @@ export function TimewallOfferwall() {
     );
   }
 
-  // Construct the URL directly as per the user's provided iframe.
-  const iframeUrl = `https://timewall.io/users/login?oid=${TIMEWALL_APP_ID}&uid=${user.uid}`;
+  // Construction de l'URL finale en utilisant 'app' et 'user' comme noms de paramètres, comme requis par Timewall.
+  const iframeUrl = `https://timewall.io/users/login?app=${TIMEWALL_APP_ID}&user=${user.uid}`;
 
   return (
     <GlassCard className="w-full">

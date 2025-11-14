@@ -23,7 +23,7 @@ export function CpxOfferwall() {
     );
   }
 
-  const iframeUrl = `https://offers.cpx-research.com/index.php?app_id=${CPX_APP_ID}&ext_user_id=${user.uid}&username=${user.displayName}&hash=${CPX_IFRAME_HASH}`;
+  const iframeUrl = `https://live.cpx-research.com/index.php?app_id=${CPX_APP_ID}&ext_user_id=${user.uid}&username=${user.displayName}&hash=${CPX_IFRAME_HASH}`;
 
   return (
     <GlassCard className="w-full">

@@ -4,8 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useAuth } from '@/hooks/use-auth';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, addDoc, serverTimestamp, query, orderBy, limit } from 'firebase/firestore';
 import type { ChatMessage } from '@/lib/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -22,7 +21,7 @@ const chatSchema = z.object({
 });
 
 export function ChatView() {
-  const { user, userProfile } = useAuth();
+  const { user, userProfile } = useUser();
   const db = useFirestore();
   const [isSending, setIsSending] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -44,7 +43,8 @@ export function ChatView() {
   }, [db]);
 
   const { data: messages, isLoading } = useCollection<ChatMessage>(messagesQuery);
-  const reversedMessages = useMemo(() => messages?.slice().reverse(), [messages]);
+  const reversedMessages = messages ? [...messages].reverse() : [];
+
 
   useEffect(() => {
     // Scroll to bottom when new messages arrive

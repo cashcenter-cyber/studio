@@ -3,7 +3,7 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { useAuth } from '@/hooks/use-auth'
+import { useUser } from '@/firebase'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -34,7 +34,7 @@ const payoutSchema = z.object({
 })
 
 export function RewardForm() {
-  const { user, userProfile } = useAuth()
+  const { user, userProfile } = useUser()
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
 

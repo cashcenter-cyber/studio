@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Gift, ShieldCheck, UserCog, BarChart3, Wallet, ListPlus, Trophy, MessageSquare } from 'lucide-react';
-import { useAuth } from '@/hooks/use-auth';
+import { useUser } from '@/firebase';
 import { cn } from '@/lib/utils';
 
 const navItems = [
@@ -23,7 +23,7 @@ const adminNavItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { userProfile } = useAuth();
+  const { userProfile } = useUser();
 
   return (
     <aside className="hidden md:flex w-64 flex-col border-r border-primary/10 bg-sidebar/50 p-4">

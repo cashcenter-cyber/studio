@@ -1,7 +1,6 @@
 'use client';
 
-import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
-import { useAuth } from "@/hooks/use-auth";
+import { useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase";
 import { collection, query, orderBy, limit } from "firebase/firestore";
 import type { Transaction } from "@/lib/types";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -22,7 +21,7 @@ function TransactionRowSkeleton() {
 }
 
 export function TransactionList() {
-    const { user } = useAuth();
+    const { user } = useUser();
     const db = useFirestore();
 
     const transactionsQuery = useMemoFirebase(() => {

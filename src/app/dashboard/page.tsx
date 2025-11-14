@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from '@/hooks/use-auth';
+import { useUser } from '@/firebase';
 import { StatCard } from '@/components/dashboard/stat-card';
 import { DollarSign, CheckCircle, Clock, Trash2, Loader2 } from 'lucide-react';
 import { useCollection } from '@/firebase';
@@ -50,7 +50,7 @@ async function deleteAndAnonymizeUser(userId: string, token: string | undefined)
 
 
 export default function DashboardPage() {
-  const { user, userProfile } = useAuth();
+  const { user, userProfile } = useUser();
   const db = useFirestore();
   const auth = useAuthService();
   const { toast } = useToast();

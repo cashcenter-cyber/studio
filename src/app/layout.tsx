@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter, Space_Grotesk } from 'next/font/google';
 import { cn } from '@/lib/utils';
-import { AuthProvider } from '@/context/auth-provider';
 import { Toaster } from '@/components/ui/toaster';
 import './globals.css';
 import { ThemeProvider } from '@/context/theme-provider';
@@ -44,13 +43,11 @@ export default function RootLayout({
             disableTransitionOnChange
         >
           <FirebaseClientProvider>
-            <AuthProvider>
               <AnimatedBackground />
               <div className="relative z-10">
                 {children}
               </div>
               <Toaster />
-            </AuthProvider>
           </FirebaseClientProvider>
         </ThemeProvider>
       </body>

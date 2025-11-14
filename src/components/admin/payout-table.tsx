@@ -15,14 +15,14 @@ import { Badge } from '@/components/ui/badge'
 import { formatDistanceToNow } from 'date-fns'
 import { Check, X, Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
-import { useAuth } from '@/hooks/use-auth'
+import { useUser } from '@/firebase'
 import { processPayoutAction } from '@/lib/actions'
 
 export function PayoutTable({ payouts: initialPayouts }: { payouts: Payout[] }) {
     const [payouts, setPayouts] = useState(initialPayouts);
     const [loading, setLoading] = useState<string | null>(null);
     const { toast } = useToast();
-    const { user } = useAuth();
+    const { user } = useUser();
     const [isPending, startTransition] = useTransition();
 
     const handleProcess = (payoutId: string, status: 'approved' | 'declined') => {

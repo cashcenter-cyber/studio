@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useAuth } from '@/hooks/use-auth';
+import { useUser } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { GlassCard, CardContent } from '@/components/ui/glass-card';
 import { Label } from '@/components/ui/label';
@@ -22,7 +22,7 @@ const usernameSchema = z.object({
 type UsernameFormValues = z.infer<typeof usernameSchema>;
 
 export function UserProfileCard() {
-  const { user, userProfile, isUserLoading } = useAuth();
+  const { user, userProfile, isUserLoading } = useUser();
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [isPending, startTransition] = useTransition();

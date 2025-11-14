@@ -26,7 +26,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { useAuth } from '@/hooks/use-auth'
+import { useUser } from '@/firebase'
 
 async function deleteAndAnonymizeUser(userId: string, token: string | undefined) {
     if (!token) {
@@ -53,7 +53,7 @@ async function deleteAndAnonymizeUser(userId: string, token: string | undefined)
 export function UserTable({ users }: { users: UserProfile[] }) {
     const [loading, setLoading] = useState<string | null>(null);
     const { toast } = useToast();
-    const { user } = useAuth();
+    const { user } = useUser();
 
 
     const handleDelete = async (userId: string) => {

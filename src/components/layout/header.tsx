@@ -14,7 +14,7 @@ import {
   Trophy,
   MessageSquare,
 } from 'lucide-react';
-import { useAuth } from '@/hooks/use-auth';
+import { useUser } from '@/firebase';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -31,7 +31,7 @@ import { ThemeSwitcher } from './theme-switcher';
 import { cn } from '@/lib/utils';
 
 export function Header() {
-  const { user, userProfile, loading } = useAuth();
+  const { user, userProfile, isUserLoading } = useUser();
   const auth = useAuthService();
 
   const handleSignOut = async () => {
@@ -100,7 +100,7 @@ export function Header() {
           )}
         </nav>
         <div className="flex items-center justify-end space-x-4">
-            {loading ? null : user ? (
+            {isUserLoading ? null : user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button

@@ -34,6 +34,11 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  env: {
+    NEXT_PUBLIC_CPX_APP_ID: process.env.NEXT_PUBLIC_CPX_APP_ID,
+    NEXT_PUBLIC_CPX_IFRAME_HASH: process.env.NEXT_PUBLIC_CPX_IFRAME_HASH,
+    NEXT_PUBLIC_TIMEWALL_APP_ID: process.env.NEXT_PUBLIC_TIMEWALL_APP_ID,
+  }
 };
 
 export default nextConfig;

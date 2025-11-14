@@ -228,7 +228,7 @@ export async function getCpxUrlAction(
     const secretKey = "VAEvtiPj8ehJAgKR6keIZAE2GdZdOg0k";
   
     // As per most hash-based integrations, the hash is usually created from the user ID and the secret key.
-    const hash = createHash('md5').update(`${userId}-${secretKey}`).digest('hex');
+    const hash = createHash('sha1').update(`${userId}-${secretKey}`).digest('hex');
   
     const url = new URL('https://offers.cpx-research.com/index.php');
     url.searchParams.append('app_id', appId);

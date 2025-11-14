@@ -1,21 +1,46 @@
+
 'use client';
 
 import { useUser } from '@/firebase';
 import { Loader2 } from 'lucide-react';
 import { GlassCard } from '../ui/glass-card';
-
-// Les variables sont maintenant directement disponibles grâce à la configuration de next.config.ts
-const CPX_APP_ID = process.env.NEXT_PUBLIC_CPX_APP_ID;
-const CPX_IFRAME_HASH = process.env.NEXT_PUBLIC_CPX_IFRAME_HASH;
+import { useEffect, useState } from 'react';
+import { getCpxUrlAction } from '@/lib/actions';
 
 export function CpxOfferwall() {
-  const { user } = useUser();
+  const { user, userProfile } = useUser();
+  const [iframeUrl, setIframeUrl] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!CPX_APP_ID || !CPX_IFRAME_HASH) {
-    return <div className="text-destructive">CPX Research is not configured. Please set NEXT_PUBLIC_CPX_APP_ID and NEXT_PUBLIC_CPX_IFRAME_HASH in your environment variables.</div>;
+  useEffect(() => {
+    if (user && userProfile) {
+      const fetchCpxUrl = async () => {
+        try {
+          const result = await getCpxUrlAction(
+            user.uid,
+            userProfile.username || 'user',
+            user.email || ''
+          );
+          if (result.success) {
+            setIframeUrl(result.url);
+          } else {
+            throw new Error('Failed to get CPX URL from server action.');
+          }
+        } catch (err) {
+          console.error('CPX Offerwall Error:', err);
+          setError('Could not load the offerwall. Please try again later.');
+        }
+      };
+
+      fetchCpxUrl();
+    }
+  }, [user, userProfile]);
+
+  if (error) {
+    return <div className="text-destructive p-4 glass-card">{error}</div>;
   }
-  
-  if (!user) {
+
+  if (!user || !iframeUrl) {
     return (
       <div className="flex items-center justify-center h-96">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -23,15 +48,13 @@ export function CpxOfferwall() {
     );
   }
 
-  const iframeUrl = `https://live.cpx-research.com/index.php?app_id=${CPX_APP_ID}&ext_user_id=${user.uid}&username=${user.displayName}&hash=${CPX_IFRAME_HASH}`;
-
   return (
     <GlassCard className="w-full">
-        <iframe
-            src={iframeUrl}
-            className="w-full h-[80vh] min-h-[600px] border-0 rounded-xl"
-            title="CPX Research Offerwall"
-        />
+      <iframe
+        src={iframeUrl}
+        className="w-full h-[80vh] min-h-[600px] border-0 rounded-xl"
+        title="CPX Research Offerwall"
+      />
     </GlassCard>
   );
 }

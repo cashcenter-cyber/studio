@@ -214,26 +214,16 @@ export async function updateUsernameAction(formData: FormData, token: string | u
 
 export async function getTimewallUrlAction(userId: string) {
     const TIMEWALL_API_KEY = process.env.NEXT_PUBLIC_TIMEWALL_APP_ID;
-    const TIMEWALL_SECRET_KEY = "c68c29bfbae761006c9e1975bfcef1b1";
 
     if (!TIMEWALL_API_KEY) {
         console.error('Timewall Action Error: NEXT_PUBLIC_TIMEWALL_APP_ID is not set.');
         return { success: false, error: 'Timewall integration is not configured correctly on the server (missing API_KEY).' };
     }
-
-    if (!TIMEWALL_SECRET_KEY) {
-        console.error('Timewall Action Error: TIMEWALL_SECRET_KEY is not set.');
-        return { success: false, error: 'Timewall integration is not configured correctly on the server (missing SECRET_KEY).' };
-    }
-
-    try {
-        const hashString = userId + TIMEWALL_SECRET_KEY;
-        const hash = createHash('sha256').update(hashString).digest('hex');
-        const url = `https://offers.timewall.io/login?app=${TIMEWALL_API_KEY}&user=${userId}&hash=${hash}`;
-        
-        return { success: true, url };
-    } catch (error: any) {
-        console.error('Error generating Timewall URL:', error);
-        return { success: false, error: 'Internal Server Error while generating Timewall URL.' };
-    }
+    
+    // Using the exact URL structure provided by the user.
+    // oid = Your App ID (API Key)
+    // uid = The user's ID in your system
+    const url = `https://timewall.io/users/login?oid=${TIMEWALL_API_KEY}&uid=${userId}`;
+    
+    return { success: true, url };
 }

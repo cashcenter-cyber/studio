@@ -3,11 +3,11 @@
 import { useUser } from '@/firebase';
 import { StatCard } from '@/components/dashboard/stat-card';
 import { DollarSign, CheckCircle, Clock, Trash2, Loader2 } from 'lucide-react';
-import { useCollection } from '@/firebase';
+import { useCollection, useDoc } from '@/firebase';
 import { useState } from 'react';
-import { collection, query, where } from 'firebase/firestore';
+import { collection, query, where, doc } from 'firebase/firestore';
 import { useFirestore, useMemoFirebase } from '@/firebase';
-import type { Payout } from '@/lib/types';
+import type { Payout, UserProfile } from '@/lib/types';
 import { TransactionList } from '@/components/dashboard/transaction-list';
 import { GlassCard, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/glass-card';
 import { Button } from '@/components/ui/button';
@@ -50,11 +50,19 @@ async function deleteAndAnonymizeUser(userId: string, token: string | undefined)
 
 
 export default function DashboardPage() {
-  const { user, userProfile } = useUser();
+  const { user } = useUser();
   const db = useFirestore();
   const auth = useAuthService();
   const { toast } = useToast();
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // --- New Robust Profile Fetching ---
+  const userProfileRef = useMemoFirebase(() => {
+    if (!db || !user?.uid) return null;
+    return doc(db, 'users', user.uid);
+  }, [db, user?.uid]);
+  const { data: userProfile, isLoading: isProfileLoading } = useDoc<UserProfile>(userProfileRef);
+  // --- End New Profile Fetching ---
 
   const payoutsQuery = useMemoFirebase(() => {
     if (!db || !user?.uid) return null;
@@ -96,13 +104,13 @@ export default function DashboardPage() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <StatCard
           title="Current Balance"
-          value={`${(userProfile?.currentBalance ?? 0).toLocaleString()} CASH`}
+          value={isProfileLoading ? '...' : `${(userProfile?.currentBalance ?? 0).toLocaleString()} CASH`}
           icon={DollarSign}
           description="Ready to be withdrawn"
         />
         <StatCard
           title="Lifetime Earnings"
-          value={`${(userProfile?.lifetimeEarnings ?? 0).toLocaleString()} CASH`}
+          value={isProfileLoading ? '...' : `${(userProfile?.lifetimeEarnings ?? 0).toLocaleString()} CASH`}
           icon={CheckCircle}
           description="Total earned since joining"
         />
@@ -125,7 +133,7 @@ export default function DashboardPage() {
         <div className="space-y-6">
             <div>
                 <h2 className="text-2xl font-bold font-headline mb-4">My Profile</h2>
-                 <UserProfileCard />
+                 <UserProfileCard userProfile={userProfile} isLoading={isProfileLoading} />
             </div>
             <div>
                 <h2 className="text-2xl font-bold font-headline mb-4 text-destructive">Danger Zone</h2>

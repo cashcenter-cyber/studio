@@ -14,6 +14,8 @@ import { Copy, Edit, Loader2 } from 'lucide-react';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { updateUsernameAction } from '@/lib/actions';
 import { Skeleton } from '../ui/skeleton';
+import type { UserProfile } from '@/lib/types';
+
 
 const usernameSchema = z.object({
   username: z.string().min(3, 'Username must be at least 3 characters.').max(20, 'Username must be at most 20 characters.'),
@@ -21,8 +23,13 @@ const usernameSchema = z.object({
 
 type UsernameFormValues = z.infer<typeof usernameSchema>;
 
-export function UserProfileCard() {
-  const { user, userProfile, isUserLoading } = useUser();
+interface UserProfileCardProps {
+    userProfile: UserProfile | null;
+    isLoading: boolean;
+}
+
+export function UserProfileCard({ userProfile, isLoading }: UserProfileCardProps) {
+  const { user } = useUser();
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -65,7 +72,7 @@ export function UserProfileCard() {
     });
   }
 
-  if (isUserLoading || !userProfile) {
+  if (isLoading || !userProfile) {
       return (
           <GlassCard>
               <CardContent className="pt-6 space-y-6">

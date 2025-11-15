@@ -35,6 +35,7 @@ export const useUserAuthState = (auth: Auth | null, firestore: Firestore | null)
       // Once auth state is determined, the primary loading is done.
       if (!firebaseUser) {
         setIsUserLoading(false);
+        setUserProfile(null); // Clear profile on logout
       }
     }, (error) => {
       console.error("useUserAuthState: Auth state error:", error);
@@ -47,23 +48,25 @@ export const useUserAuthState = (auth: Auth | null, firestore: Firestore | null)
 
   useEffect(() => {
     if (!firestore || !user) {
-        // If there is no user, or firestore is not ready, clear profile and stop loading.
-        setUserProfile(null);
-        if (user === null) { // Only set loading to false if we know there is no user
-             setIsUserLoading(false);
-        }
+        // If there is no user, or firestore is not ready, we are not loading a profile.
+        // The overall loading state is handled by the auth state listener.
         return;
     }
     
-    // Start loading profile data
-    // setIsUserLoading(true); This can cause flashes. Let's manage it carefully.
+    // Start loading profile data specifically for the logged-in user
+    setIsUserLoading(true);
 
-    // Fetch user profile data.
     const profileDocRef = doc(firestore, 'users', user.uid);
     
     const profileUnsubscribe = onSnapshot(profileDocRef, (doc) => {
       if (doc.exists()) {
-        setUserProfile({ uid: doc.id, ...doc.data() } as UserProfile);
+        const data = doc.data();
+        const profile = { 
+            uid: doc.id,
+            ...data,
+            joinDate: data.joinDate?.toDate ? data.joinDate.toDate() : new Date(),
+        } as UserProfile;
+        setUserProfile(profile);
       } else {
         setUserProfile(null); 
       }

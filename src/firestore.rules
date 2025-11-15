@@ -78,7 +78,7 @@ service cloud.firestore {
      * Users cannot edit or delete any messages.
      */
     match /chat_messages/{messageId} {
-      allow get, list: if isSignedIn();
+      allow read, list: if isSignedIn();
       allow create: if isSignedIn() 
                     && request.resource.data.userId == request.auth.uid
                     && request.resource.data.text.size() > 0 

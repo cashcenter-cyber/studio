@@ -5,7 +5,7 @@ import type { UserProfile } from './types';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 
-const generateReferralCode = (length: number = 8) => {
+const generateReferralCode = (length: number = 8): string => {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let result = '';
   for (let i = 0; i < length; i++) {
@@ -15,45 +15,49 @@ const generateReferralCode = (length: number = 8) => {
 };
 
 interface CreateUserOptions {
-  username: string | null;
+  username?: string | null;
   referralCode?: string | null;
 }
 
 export const createUserProfile = async (
   db: Firestore, 
   userAuth: User, 
-  options: CreateUserOptions | null = { username: null }
+  options: CreateUserOptions = {}
 ): Promise<void> => {
   if (!userAuth) throw new Error("User object is missing.");
 
   const userRef = doc(db, 'users', userAuth.uid);
-  let referredBy = null;
-
-  if (options?.referralCode) {
+  let referredBy: string | null = null;
+  
+  if (options.referralCode) {
     const usersRef = collection(db, 'users');
-    const q = query(usersRef, where('referralCode', '==', options.referralCode), limit(1));
-    const querySnapshot = await getDocs(q);
-    if (!querySnapshot.empty) {
-      const referringUserDoc = querySnapshot.docs[0];
-      referredBy = referringUserDoc.id;
+    const q = query(usersRef, where('referralCode', '==', options.referralCode.toUpperCase()), limit(1));
+    try {
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        const referringUserDoc = querySnapshot.docs[0];
+        referredBy = referringUserDoc.id;
+      }
+    } catch (e) {
+        console.error("Error finding referrer:", e);
     }
   }
   
   const userRole = 'user';
 
-  const newUserProfile: UserProfile = {
-    uid: userAuth.uid, // Add uid to the profile data itself
+  const newUserProfile: Omit<UserProfile, 'joinDate'> & { joinDate: any } = {
+    uid: userAuth.uid,
     email: userAuth.email,
-    username: options?.username || userAuth.displayName || userAuth.email,
+    username: options.username || userAuth.displayName || userAuth.email?.split('@')[0] || `user_${userAuth.uid.substring(0, 6)}`,
     currentBalance: 0,
     lifetimeEarnings: 0,
     role: userRole,
-    joinDate: serverTimestamp() as any,
+    joinDate: serverTimestamp(),
     status: 'active',
     referralCode: generateReferralCode(),
     referredBy: referredBy,
-    referralOf: options?.referralCode || null,
-    referralEarnings: 0
+    referralOf: options.referralCode || null,
+    referralEarnings: 0,
   };
 
   try {

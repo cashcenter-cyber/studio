@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -30,9 +30,15 @@ export function UserProfileCard() {
   const form = useForm<UsernameFormValues>({
     resolver: zodResolver(usernameSchema),
     defaultValues: {
-      username: userProfile?.username || '',
+      username: '',
     },
   });
+
+  useEffect(() => {
+    if (userProfile) {
+      form.reset({ username: userProfile.username || '' });
+    }
+  }, [userProfile, form]);
 
   const handleCopy = () => {
     if (userProfile?.referralCode) {
@@ -93,7 +99,7 @@ export function UserProfileCard() {
                                 )}
                             </div>
                             <FormControl>
-                                <Input id="username" {...field} readOnly={!isEditing} className={!isEditing ? 'border-transparent' : ''}/>
+                                <Input id="username" {...field} readOnly={!isEditing} className={!isEditing ? 'border-transparent bg-transparent' : ''}/>
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -116,12 +122,12 @@ export function UserProfileCard() {
             <>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" value={user?.email ?? ''} readOnly className="border-transparent"/>
+                  <Input id="email" value={user?.email ?? ''} readOnly className="border-transparent bg-transparent"/>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="referral">Your Referral Code</Label>
                   <div className="flex items-center gap-2">
-                    <Input id="referral" value={userProfile?.referralCode ?? ''} readOnly className="font-mono border-transparent" />
+                    <Input id="referral" value={userProfile?.referralCode ?? ''} readOnly className="font-mono border-transparent bg-transparent" />
                     <Button variant="outline" size="icon" onClick={handleCopy}>
                       <Copy className="h-4 w-4" />
                     </Button>

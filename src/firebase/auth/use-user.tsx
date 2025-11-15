@@ -33,7 +33,9 @@ export const useUserAuthState = (auth: Auth | null, firestore: Firestore | null)
     const authUnsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
       // Once auth state is determined, the primary loading is done.
-      setIsUserLoading(false); 
+      if (!firebaseUser) {
+        setIsUserLoading(false);
+      }
     }, (error) => {
       console.error("useUserAuthState: Auth state error:", error);
       setUserError(error);
@@ -45,12 +47,18 @@ export const useUserAuthState = (auth: Auth | null, firestore: Firestore | null)
 
   useEffect(() => {
     if (!firestore || !user) {
-        // If there is no user, or firestore is not ready, clear profile.
+        // If there is no user, or firestore is not ready, clear profile and stop loading.
         setUserProfile(null);
+        if (user === null) { // Only set loading to false if we know there is no user
+             setIsUserLoading(false);
+        }
         return;
     }
+    
+    // Start loading profile data
+    // setIsUserLoading(true); This can cause flashes. Let's manage it carefully.
 
-    // Fetch user profile data. This does not set isUserLoading.
+    // Fetch user profile data.
     const profileDocRef = doc(firestore, 'users', user.uid);
     
     const profileUnsubscribe = onSnapshot(profileDocRef, (doc) => {
@@ -59,16 +67,17 @@ export const useUserAuthState = (auth: Auth | null, firestore: Firestore | null)
       } else {
         setUserProfile(null); 
       }
+      setIsUserLoading(false); // Profile loaded (or confirmed not to exist)
     }, (error) => {
       console.error("useUserAuthState: Profile snapshot error:", error);
-      // We can set a userError here, but we won't block the UI with a loader.
       setUserError(error);
       setUserProfile(null);
+      setIsUserLoading(false); // Stop loading on error too
     });
 
     return () => profileUnsubscribe();
 
-  }, [user, firestore]); // Rerun only when the user object or firestore instance changes.
+  }, [user, firestore]);
 
   return { user, userProfile, isUserLoading, userError };
 };

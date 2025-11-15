@@ -61,7 +61,7 @@ export function UserProfileCard({ userProfile, isLoading }: UserProfileCardProps
     if (!user) return;
 
     startTransition(async () => {
-        const token = await user.getIdToken();
+        const token = await user.getIdToken(true); // Force refresh token
         const result = await updateUsernameAction(data.username, token);
         if (result.success) {
             toast({ title: 'Success', description: 'Your username has been updated.' });

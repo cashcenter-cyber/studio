@@ -50,6 +50,11 @@ export const useUserAuthState = (auth: Auth | null, firestore: Firestore | null)
     if (!firestore || !user) {
         // If there is no user, or firestore is not ready, we are not loading a profile.
         // The overall loading state is handled by the auth state listener.
+        // if user is null, isUserLoading should be false (set by the other useEffect)
+        if (!user) {
+          setIsUserLoading(false);
+          setUserProfile(null);
+        }
         return;
     }
     

@@ -12,19 +12,25 @@ service cloud.firestore {
     }
 
     function isAdmin() {
+      // Check for a custom claim 'admin' on the user's token.
       return request.auth.token.admin == true;
     }
 
+    // Users can read and write to their own profile document.
+    // No one can list all users.
     match /users/{userId} {
-      allow read, update, delete: if isSignedIn() && isOwner(userId);
-      allow create: if isSignedIn() && isOwner(userId);
+      allow read, write: if isSignedIn() && isOwner(userId);
       allow list: if false; 
     }
 
+    // Users can read and write their own transactions.
     match /users/{userId}/transactions/{transactionId} {
       allow read, write: if isSignedIn() && isOwner(userId);
     }
     
+    // Payouts can be created by the owner.
+    // They can be read by the owner or an admin.
+    // They can only be listed or updated by an admin.
     match /payouts/{payoutId} {
       allow get: if isSignedIn() && (isOwner(resource.data.userId) || isAdmin());
       allow list: if isAdmin();
@@ -33,22 +39,27 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Offers are publicly readable by any signed-in user.
+    // Only admins can create, update, or delete offers.
     match /offers/{offerId} {
-        allow get, list: if isSignedIn();
+        allow read: if isSignedIn();
         allow write: if isAdmin();
     }
-
-    match /roles_admin/{userId} {
-      allow get, list, write: if isAdmin();
-    }
-
+    
+    // Chat messages can be read by any authenticated user.
+    // Users can only create messages for themselves, with a limited size.
     match /chat_messages/{messageId} {
-      allow read, list: if isSignedIn();
+      allow read: if isSignedIn();
       allow create: if isSignedIn() 
                     && request.resource.data.userId == request.auth.uid
                     && request.resource.data.text.size() > 0 
                     && request.resource.data.text.size() <= 280;
       allow update, delete: if false;
+    }
+    
+    // Admin role documents can only be accessed by admins.
+    match /roles_admin/{userId} {
+      allow get, list, write: if isAdmin();
     }
   }
 }

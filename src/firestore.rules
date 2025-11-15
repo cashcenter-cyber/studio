@@ -9,7 +9,6 @@
  * Data Structure:
  * - /users/{userId}: Stores user profile data.
  * - /users/{userId}/transactions/{transactionId}: Stores transaction history for each user.
- * - /users/{userId}/payouts/{payoutId}: Stores a user's own payout history for their dashboard view.
  * - /payouts/{payoutId}: Root collection for all user payout requests for admin processing.
  * - /offers/{offerId}: Stores all available offers.
  * - /roles_admin/{userId}: Used to assign global admin role.
@@ -20,15 +19,29 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Secure user profiles. Only the user can read or write their own profile.
-     * The create rule is relaxed to allow profile creation immediately after signup,
-     * ensuring the UID in the new document matches the authenticated user's ID.
+     * Helper Functions
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      // Check for custom claim `admin`. This is more secure and efficient than a document read.
+      return request.auth.token.admin == true;
+    }
+
+    /**
+     * @description Secure user profiles. A user can read/write their own profile.
+     * New users can create their profile upon signup.
      */
     match /users/{userId} {
       allow read, update, delete: if isSignedIn() && isOwner(userId);
-      // Allow creation if the UID in the document being created matches the document ID (which is the user's UID)
-      // This is crucial for new user sign-up.
-      allow create: if isSignedIn() && request.resource.data.uid == userId;
+      // Allow creation if the user is signed in and the document ID matches their UID.
+      allow create: if isSignedIn() && isOwner(userId);
       allow list: if false; // Listing all users is not permitted for clients.
     }
 
@@ -39,14 +52,6 @@ service cloud.firestore {
       allow read, write: if isSignedIn() && isOwner(userId);
     }
     
-    /**
-     * @description Secure user-specific payouts for dashboard view. Only the user can read their own.
-     */
-    match /users/{userId}/payouts/{payoutId} {
-        allow read: if isSignedIn() && isOwner(userId);
-        allow write: if false; // User payouts are created via a server action to the root collection
-    }
-
     /**
      * @description Secure payouts root collection. Users can create them. Admins can read list and update.
      */
@@ -84,20 +89,6 @@ service cloud.firestore {
                     && request.resource.data.text.size() > 0 
                     && request.resource.data.text.size() <= 280;
       allow update, delete: if false;
-    }
-
-    // Helper functions
-    function isSignedIn() {
-      return request.auth != null;
-    }
-
-    function isOwner(userId) {
-      return request.auth.uid == userId;
-    }
-
-    function isAdmin() {
-      // Check for custom claim `admin`. This is more secure and efficient than a document read.
-      return request.auth.token.admin == true;
     }
   }
 }

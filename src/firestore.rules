@@ -1,26 +1,8 @@
-/**
- * @fileoverview Firestore Security Rules for CashCenter.fun.
- *
- * Core Philosophy:
- * This ruleset enforces a strict user-ownership model for user profiles and transactions.
- * Payouts are in a root collection for admin review, with user-specific read access.
- * Administrative privileges are role-based.
- *
- * Data Structure:
- * - /users/{userId}: Stores user profile data.
- * - /users/{userId}/transactions/{transactionId}: Stores transaction history for each user.
- * - /payouts/{payoutId}: Root collection for all user payout requests for admin processing.
- * - /offers/{offerId}: Stores all available offers.
- * - /roles_admin/{userId}: Used to assign global admin role.
- * - /chat_messages/{messageId}: Stores all messages for the general chat.
- */
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    /**
-     * Helper Functions
-     */
     function isSignedIn() {
       return request.auth != null;
     }
@@ -30,31 +12,19 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      // Check for custom claim `admin`. This is more secure and efficient than a document read.
       return request.auth.token.admin == true;
     }
 
-    /**
-     * @description Secure user profiles. A user can read/write their own profile.
-     * New users can create their profile upon signup.
-     */
     match /users/{userId} {
       allow read, update, delete: if isSignedIn() && isOwner(userId);
-      // Allow creation if the user is signed in and the document ID matches their UID.
       allow create: if isSignedIn() && isOwner(userId);
-      allow list: if false; // Listing all users is not permitted for clients.
+      allow list: if false; 
     }
 
-    /**
-     * @description Secure user transactions. Only the user can read or write their own transactions.
-     */
     match /users/{userId}/transactions/{transactionId} {
       allow read, write: if isSignedIn() && isOwner(userId);
     }
     
-    /**
-     * @description Secure payouts root collection. Users can create them. Admins can read list and update.
-     */
     match /payouts/{payoutId} {
       allow get: if isSignedIn() && (isOwner(resource.data.userId) || isAdmin());
       allow list: if isAdmin();
@@ -63,25 +33,15 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    /**
-     * @description Public offers. Any signed-in user can read them. Only admins can write.
-     */
     match /offers/{offerId} {
         allow get, list: if isSignedIn();
         allow write: if isAdmin();
     }
 
-    /**
-     * @description Grants admin role. Only admins can read or write to this collection.
-     */
     match /roles_admin/{userId} {
       allow get, list, write: if isAdmin();
     }
 
-    /**
-     * @description General chat messages. Any signed-in user can read and create messages.
-     * Users cannot edit or delete any messages.
-     */
     match /chat_messages/{messageId} {
       allow read, list: if isSignedIn();
       allow create: if isSignedIn() 

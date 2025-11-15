@@ -9,18 +9,17 @@ let firebaseApp: FirebaseApp;
 let auth: Auth;
 let firestore: Firestore;
 
-// This ensures that Firebase is initialized only once.
-if (!getApps().length) {
-  firebaseApp = initializeApp(firebaseConfig);
-} else {
-  firebaseApp = getApp();
-}
-
-auth = getAuth(firebaseApp);
-firestore = getFirestore(firebaseApp);
-
+// This function ensures that Firebase is initialized only once.
 export function initializeFirebase(): { firebaseApp: FirebaseApp, auth: Auth, firestore: Firestore } {
-  // Now, this function just returns the already initialized services.
+  if (!getApps().length) {
+    firebaseApp = initializeApp(firebaseConfig);
+  } else {
+    firebaseApp = getApp();
+  }
+
+  auth = getAuth(firebaseApp);
+  firestore = getFirestore(firebaseApp);
+  
   return { firebaseApp, auth, firestore };
 }
 

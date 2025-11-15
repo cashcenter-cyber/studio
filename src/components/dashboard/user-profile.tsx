@@ -53,12 +53,9 @@ export function UserProfileCard() {
   const onSubmit = async (data: UsernameFormValues) => {
     if (!user) return;
 
-    const formData = new FormData();
-    formData.append('username', data.username);
-
     startTransition(async () => {
         const token = await user.getIdToken();
-        const result = await updateUsernameAction(formData, token);
+        const result = await updateUsernameAction(data.username, token);
         if (result.success) {
             toast({ title: 'Success', description: 'Your username has been updated.' });
             setIsEditing(false);

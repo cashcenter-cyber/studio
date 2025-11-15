@@ -176,11 +176,7 @@ export async function deleteOfferAction(offerId: string) {
     }
 }
 
-const usernameSchema = z.object({
-  username: z.string().min(3, 'Username must be at least 3 characters.').max(20, 'Username must be at most 20 characters.'),
-});
-
-export async function updateUsernameAction(formData: FormData, token: string | undefined) {
+export async function updateUsernameAction(username: string, token: string | undefined) {
     if (!token) {
         return { success: false, error: 'User is not authenticated.' };
     }
@@ -193,19 +189,12 @@ export async function updateUsernameAction(formData: FormData, token: string | u
         return { success: false, error: 'Database service is not available.' };
     }
     
-    const values = Object.fromEntries(formData.entries());
-    const validatedFields = usernameSchema.safeParse(values);
-
-    if (!validatedFields.success) {
-        return { success: false, error: 'Invalid data provided.' };
-    }
-
-    const { username } = validatedFields.data;
     const userRef = doc(adminDb, 'users', decodedToken.uid);
 
     try {
         await updateDoc(userRef, { username });
         revalidatePath('/dashboard');
+        revalidatePath(`/dashboard/user/${decodedToken.uid}`); // Revalidate specific user page if exists
         return { success: true };
     } catch (error: any) {
         return { success: false, error: error.message || 'Failed to update username.' };

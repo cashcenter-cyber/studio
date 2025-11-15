@@ -72,13 +72,22 @@ export function UserProfileCard({ userProfile, isLoading }: UserProfileCardProps
     });
   }
 
-  if (isLoading || !userProfile) {
+  if (isLoading) {
       return (
           <GlassCard>
               <CardContent className="pt-6 space-y-6">
-                <div className="space-y-2"><Skeleton className="h-4 w-20" /><Skeleton className="h-10 w-full" /></div>
-                <div className="space-y-2"><Skeleton className="h-4 w-20" /><Skeleton className="h-10 w-full" /></div>
-                <div className="space-y-2"><Skeleton className="h-4 w-20" /><Skeleton className="h-10 w-full" /></div>
+                <div className="space-y-2">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-10 w-full" />
+                </div>
+                <div className="space-y-2">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-10 w-full" />
+                </div>
+                <div className="space-y-2">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-10 w-full" />
+                </div>
               </CardContent>
           </GlassCard>
       )
@@ -131,8 +140,8 @@ export function UserProfileCard({ userProfile, isLoading }: UserProfileCardProps
                 <div className="space-y-2">
                   <Label htmlFor="referral">Your Referral Code</Label>
                   <div className="flex items-center gap-2">
-                    <Input id="referral" value={userProfile?.referralCode ?? ''} readOnly className="font-mono border-transparent bg-transparent" />
-                    <Button variant="outline" size="icon" onClick={handleCopy}>
+                    <Input id="referral" value={userProfile?.referralCode ?? '...'} readOnly className="font-mono border-transparent bg-transparent" />
+                    <Button variant="outline" size="icon" onClick={handleCopy} disabled={!userProfile?.referralCode}>
                       <Copy className="h-4 w-4" />
                     </Button>
                   </div>

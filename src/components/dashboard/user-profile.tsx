@@ -68,7 +68,7 @@ export function UserProfileCard() {
     });
   }
 
-  if (isUserLoading) {
+  if (isUserLoading || !userProfile) {
       return (
           <GlassCard>
               <CardContent className="pt-6 space-y-6">

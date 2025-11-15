@@ -13,22 +13,22 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, isUserLoading } = useUser();
+  const { user, isLoading } = useUser();
   const router = useRouter();
 
   useEffect(() => {
     // Wait until the loading is complete
-    if (isUserLoading) {
+    if (isLoading) {
       return;
     }
     // If loading is finished and there's no user, redirect
     if (!user) {
       router.push('/auth');
     }
-  }, [user, isUserLoading, router]);
+  }, [user, isLoading, router]);
 
   // While loading, show a spinner. This prevents a flash of content or a premature redirect.
-  if (isUserLoading) {
+  if (isLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
         <div className="flex items-center gap-4">

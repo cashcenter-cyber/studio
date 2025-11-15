@@ -12,7 +12,6 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      // Check for a custom claim 'admin' on the user's token.
       return request.auth.token.admin == true;
     }
 
@@ -20,6 +19,7 @@ service cloud.firestore {
     // No one can list all users.
     match /users/{userId} {
       allow read, write: if isSignedIn() && isOwner(userId);
+      // Deny list access for security.
       allow list: if false; 
     }
 
@@ -46,8 +46,7 @@ service cloud.firestore {
         allow write: if isAdmin();
     }
     
-    // Chat messages can be read by any authenticated user.
-    // Users can only create messages for themselves, with a limited size.
+    // Chat messages can be read and created by any authenticated user.
     match /chat_messages/{messageId} {
       allow read: if isSignedIn();
       allow create: if isSignedIn() 

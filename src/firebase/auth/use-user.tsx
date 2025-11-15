@@ -1,63 +1,100 @@
 'use client';
 
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, createContext } from 'react';
 import { Auth, User, onAuthStateChanged } from 'firebase/auth';
+import { doc, onSnapshot, DocumentData, Firestore } from 'firebase/firestore';
 import type { UserProfile } from '@/lib/types';
 import { FirebaseContext } from '@/firebase/provider';
 
-// Interface for the user authentication state
-export interface UserAuthState {
+// This is the shape of our combined User state, including both auth and profile data
+export interface UserState {
   user: User | null;
-  isUserLoading: boolean;
-  userError: Error | null;
+  userProfile: UserProfile | null;
+  isLoading: boolean; // A single loading state
+  error: Error | null;
 }
 
-/**
- * A dedicated internal hook to manage ONLY the authentication state.
- * Profile data is now handled separately by the components that need it.
- */
-export const useUserAuthState = (auth: Auth | null): UserAuthState => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isUserLoading, setIsUserLoading] = useState(true);
-  const [userError, setUserError] = useState<Error | null>(null);
+// Create a context to hold this state.
+const UserContext = createContext<UserState | undefined>(undefined);
 
-  useEffect(() => {
-    if (!auth) {
-      setIsUserLoading(false);
-      return;
+// A new provider component specifically for user data.
+export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const context = useContext(FirebaseContext);
+    if (context === undefined) {
+        throw new Error('UserProvider must be used within a FirebaseProvider.');
     }
+    const { auth, firestore } = context;
 
-    const authUnsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      setUser(firebaseUser);
-      setIsUserLoading(false);
-    }, (error) => {
-      console.error("useUserAuthState: Auth state error:", error);
-      setUserError(error);
-      setIsUserLoading(false);
-    });
+    const [user, setUser] = useState<User | null>(null);
+    const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<Error | null>(null);
 
-    return () => authUnsubscribe();
-  }, [auth]);
+    useEffect(() => {
+        if (!auth || !firestore) {
+            setIsLoading(false);
+            return;
+        }
 
-  return { user, isUserLoading, userError };
+        // --- Step 1: Listen for Auth State Changes ---
+        const authUnsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+            setUser(firebaseUser); // Update the user object
+
+            if (!firebaseUser) {
+                // If the user logs out, clear everything and stop loading.
+                setUserProfile(null);
+                setIsLoading(false);
+            }
+        }, (authError) => {
+            console.error("Auth state error:", authError);
+            setError(authError);
+            setIsLoading(false);
+        });
+
+        // --- Step 2: Listen for Profile Document Changes (if user is logged in) ---
+        let profileUnsubscribe: () => void = () => {};
+        if (user) {
+            const profileRef = doc(firestore, 'users', user.uid);
+            profileUnsubscribe = onSnapshot(profileRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    setUserProfile(docSnap.data() as UserProfile);
+                } else {
+                    setUserProfile(null); // Profile doesn't exist
+                }
+                setIsLoading(false); // Loading is complete after profile is fetched
+            }, (profileError) => {
+                console.error("Profile snapshot error:", profileError);
+                setError(profileError);
+                setIsLoading(false);
+            });
+        } else {
+             // If there's no user, we are not loading.
+             setIsLoading(false);
+        }
+
+        // Cleanup function
+        return () => {
+            authUnsubscribe();
+            profileUnsubscribe();
+        };
+
+    }, [auth, firestore, user]); // Rerun effect if services or user object changes
+
+    const value = { user, userProfile, isLoading, error };
+
+    return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 };
 
-// This custom type provides userProfile, but it will come from components, not the hook itself.
-export interface UserState extends UserAuthState {
-    userProfile: UserProfile | null;
-}
 
 /**
- * Hook for accessing the authenticated user's state.
- * This hook ONLY provides the Firebase Auth user object.
- * It is up to components to fetch the user's profile document from Firestore.
- * @returns {UserAuthState} Object with user, isUserLoading, userError.
+ * The ONE hook to rule them all.
+ * Provides the complete user state: auth object, firestore profile, and loading status.
+ * @returns {UserState}
  */
-export const useUser = (): UserAuthState => {
-  const context = useContext(FirebaseContext);
+export const useUser = (): UserState => {
+  const context = useContext(UserContext);
   if (context === undefined) {
-    throw new Error('useUser must be used within a FirebaseProvider.');
+    throw new Error('useUser must be used within a UserProvider.');
   }
-  const { user, isUserLoading, userError } = context;
-  return { user, isUserLoading, userError };
+  return context;
 };

@@ -3,11 +3,11 @@
 import { useUser } from '@/firebase';
 import { StatCard } from '@/components/dashboard/stat-card';
 import { DollarSign, CheckCircle, Clock, Trash2, Loader2 } from 'lucide-react';
-import { useCollection, useDoc } from '@/firebase';
+import { useCollection } from '@/firebase';
 import { useState } from 'react';
-import { collection, query, where, doc } from 'firebase/firestore';
+import { collection, query, where } from 'firebase/firestore';
 import { useFirestore, useMemoFirebase } from '@/firebase';
-import type { Payout, UserProfile } from '@/lib/types';
+import type { Payout } from '@/lib/types';
 import { TransactionList } from '@/components/dashboard/transaction-list';
 import { GlassCard, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/glass-card';
 import { Button } from '@/components/ui/button';
@@ -50,19 +50,11 @@ async function deleteAndAnonymizeUser(userId: string, token: string | undefined)
 
 
 export default function DashboardPage() {
-  const { user } = useUser();
+  const { user, userProfile, isLoading: isProfileLoading } = useUser();
   const db = useFirestore();
   const auth = useAuthService();
   const { toast } = useToast();
   const [isDeleting, setIsDeleting] = useState(false);
-
-  // --- New Robust Profile Fetching ---
-  const userProfileRef = useMemoFirebase(() => {
-    if (!db || !user?.uid) return null;
-    return doc(db, 'users', user.uid);
-  }, [db, user?.uid]);
-  const { data: userProfile, isLoading: isProfileLoading } = useDoc<UserProfile>(userProfileRef);
-  // --- End New Profile Fetching ---
 
   const payoutsQuery = useMemoFirebase(() => {
     if (!db || !user?.uid) return null;

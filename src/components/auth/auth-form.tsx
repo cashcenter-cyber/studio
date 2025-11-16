@@ -54,6 +54,11 @@ export function AuthForm() {
   };
 
   const handleAuthError = (error: any) => {
+    // Avoid showing the "offline" error which is an intermediate state
+    if (error.code === 'unavailable' || (error.message && error.message.includes('offline'))) {
+      console.warn('Ignoring transient offline error during login flow.');
+      return;
+    }
     toast({
       variant: 'destructive',
       title: 'Authentication Error',

@@ -69,8 +69,8 @@ export function AuthForm() {
     setLoading(true);
     const provider = new GoogleAuthProvider();
     try {
-      // The createUserProfile logic is now handled by the useUser hook.
-      // We just need to sign in and redirect.
+      // The profile creation is now handled centrally by the useUser hook/provider.
+      // We just need to sign in, and the provider will detect the new user and create the profile.
       await signInWithPopup(auth, provider);
       handleAuthSuccess();
     } catch (error: any) {
@@ -123,6 +123,8 @@ export function AuthForm() {
         setLoading(true);
         try {
           const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+          // Profile creation is now handled by the central provider.
+          // We pass the desired username via options.
           await createUserProfile(db, userCredential.user, { username: values.username, referralCode: values.referralCode });
           handleAuthSuccess();
         } catch (error: any) {

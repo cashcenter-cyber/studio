@@ -68,7 +68,15 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
             // Check if profile exists, if not, create it.
             const docSnap = await getDoc(profileRef);
             if (!docSnap.exists()) {
-              await createUserProfile(firestore, firebaseUser);
+              // For email signup, we temporarily store username in session storage.
+              const signupUsername = sessionStorage.getItem('signupUsername');
+              const signupReferralCode = sessionStorage.getItem('signupReferralCode');
+              await createUserProfile(firestore, firebaseUser, { 
+                username: signupUsername,
+                referralCode: signupReferralCode
+              });
+              sessionStorage.removeItem('signupUsername');
+              sessionStorage.removeItem('signupReferralCode');
             }
 
             // Now, attach a real-time listener for the profile.
@@ -82,7 +90,12 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
                 }));
             }, (profileError) => {
                 console.error("Error listening to user profile:", profileError);
-                setUserState(prev => ({ ...prev, userProfile: null, isLoading: false, isUserLoading: false, error: profileError }));
+                const contextualError = new FirestorePermissionError({
+                  path: profileRef.path,
+                  operation: 'get',
+                });
+                errorEmitter.emit('permission-error', contextualError);
+                setUserState(prev => ({ ...prev, userProfile: null, isLoading: false, isUserLoading: false, error: contextualError }));
             });
 
         } catch (error: any) {

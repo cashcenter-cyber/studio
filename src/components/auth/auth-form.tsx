@@ -10,7 +10,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
 } from 'firebase/auth';
-import { useAuthService, useFirestore } from '@/firebase';
+import { useAuthService } from '@/firebase';
 import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
@@ -25,10 +25,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { createUserProfile } from '@/lib/firestore';
 import { Loader2 } from 'lucide-react';
-import { getDoc, doc } from 'firebase/firestore';
-
 
 const signUpSchema = z.object({
   username: z.string().min(3, { message: 'Username must be at least 3 characters.' }),
@@ -43,11 +40,10 @@ const loginSchema = z.object({
 });
 
 export function AuthForm() {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<string | null>(null);
   const router = useRouter();
   const { toast } = useToast();
   const auth = useAuthService();
-  const db = useFirestore();
 
   const handleAuthSuccess = () => {
     router.push('/dashboard');
@@ -66,17 +62,17 @@ export function AuthForm() {
   };
 
   const handleGoogleSignIn = async () => {
-    setLoading(true);
+    setLoading('google');
     const provider = new GoogleAuthProvider();
     try {
-      // The profile creation is now handled centrally by the useUser hook/provider.
-      // We just need to sign in, and the provider will detect the new user and create the profile.
+      // The profile creation is now handled centrally by the FirebaseProvider.
+      // We just need to sign in, and the provider will detect the new user and create the profile if needed.
       await signInWithPopup(auth, provider);
       handleAuthSuccess();
     } catch (error: any) {
         handleAuthError(error);
     } finally {
-      setLoading(false);
+      setLoading(null);
     }
   };
 
@@ -87,14 +83,14 @@ export function AuthForm() {
     });
 
     const onSubmit = async (values: z.infer<typeof loginSchema>) => {
-      setLoading(true);
+      setLoading('login');
       try {
         await signInWithEmailAndPassword(auth, values.email, values.password);
         handleAuthSuccess();
       } catch (error) {
         handleAuthError(error);
       } finally {
-        setLoading(false);
+        setLoading(null);
       }
     };
 
@@ -107,7 +103,7 @@ export function AuthForm() {
           <FormField control={form.control} name="password" render={({ field }) => (
             <FormItem><FormLabel>Password</FormLabel><FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl><FormMessage /></FormItem>
           )} />
-          <Button type="submit" className="w-full" disabled={loading}>{loading && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}Login</Button>
+          <Button type="submit" className="w-full" disabled={!!loading}>{loading === 'login' && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}Login</Button>
         </form>
       </Form>
     );
@@ -119,18 +115,23 @@ export function AuthForm() {
         defaultValues: { username: '', email: '', password: '', referralCode: '' },
       });
   
-      const onSubmit = async (values: z.infer<typeof signUpSchema>) => {
-        setLoading(true);
+    const onSubmit = async (values: z.infer<typeof signUpSchema>) => {
+        setLoading('signup');
         try {
-          const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
-          // Profile creation is now handled by the central provider.
-          // We pass the desired username via options.
-          await createUserProfile(db, userCredential.user, { username: values.username, referralCode: values.referralCode });
+          // The profile creation is handled by the central provider/listener
+          // We pass the desired username via session storage as a temporary solution
+          // as we cannot pass it directly to createUserWithEmailAndPassword
+          // and the central listener doesn't have access to this form's values.
+          sessionStorage.setItem('signupUsername', values.username);
+          sessionStorage.setItem('signupReferralCode', values.referralCode || '');
+          await createUserWithEmailAndPassword(auth, values.email, values.password);
           handleAuthSuccess();
         } catch (error: any) {
           handleAuthError(error);
         } finally {
-          setLoading(false);
+          sessionStorage.removeItem('signupUsername');
+          sessionStorage.removeItem('signupReferralCode');
+          setLoading(null);
         }
       };
 
@@ -149,7 +150,7 @@ export function AuthForm() {
           <FormField control={form.control} name="referralCode" render={({ field }) => (
             <FormItem><FormLabel>Referral Code (Optional)</FormLabel><FormControl><Input placeholder="Got a referral code?" {...field} /></FormControl><FormMessage /></FormItem>
           )} />
-          <Button type="submit" className="w-full" disabled={loading}>{loading && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}Create Account</Button>
+          <Button type="submit" className="w-full" disabled={!!loading}>{loading === 'signup' && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}Create Account</Button>
         </form>
       </Form>
     )
@@ -157,8 +158,8 @@ export function AuthForm() {
 
   return (
     <div className="space-y-6">
-       <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={loading}>
-        {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512"><path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 126 23.4 172.9 61.5l-62.7 62.7C337 97 294.6 80 248 80c-82.8 0-150.4 66.6-150.4 148.4s67.6 148.4 150.4 148.4c97.1 0 134-63.5 138.3-95.3H248v-70.7h235.5c4.3 23.7 6.5 47.8 6.5 72.7z"></path></svg>}
+       <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={!!loading}>
+        {loading === 'google' ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512"><path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 126 23.4 172.9 61.5l-62.7 62.7C337 97 294.6 80 248 80c-82.8 0-150.4 66.6-150.4 148.4s67.6 148.4 150.4 148.4c97.1 0 134-63.5 138.3-95.3H248v-70.7h235.5c4.3 23.7 6.5 47.8 6.5 72.7z"></path></svg>}
         Continue with Google
       </Button>
 

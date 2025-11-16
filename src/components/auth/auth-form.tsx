@@ -26,8 +26,6 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import { useFirestore } from '@/firebase'; // Importez useFirestore
-
 
 const signUpSchema = z.object({
   username: z.string().min(3, { message: 'Username must be at least 3 characters.' }),
@@ -46,7 +44,6 @@ export function AuthForm() {
   const router = useRouter();
   const { toast } = useToast();
   const auth = useAuthService();
-  const db = useFirestore();
 
   const handleAuthSuccess = () => {
     router.push('/dashboard');
@@ -57,10 +54,13 @@ export function AuthForm() {
   };
 
   const handleAuthError = (error: any) => {
+    console.error("Authentication Error:", error);
     toast({
       variant: 'destructive',
       title: 'Authentication Error',
-      description: error.message || 'An unknown error occurred.',
+      description: error.code === 'auth/unauthorized-domain' 
+        ? 'This domain is not authorized for authentication. Please contact support.'
+        : error.message || 'An unknown error occurred.',
     });
   };
 
@@ -69,11 +69,11 @@ export function AuthForm() {
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
-      // La création du profil est maintenant gérée par le provider central.
-      // On redirige simplement après le succès de la connexion.
+      // The creation of the profile is now handled centrally by the FirebaseProvider.
+      // We just redirect on successful login.
       handleAuthSuccess();
     } catch (error: any) {
-        handleAuthError(error);
+      handleAuthError(error);
     } finally {
       setLoading(null);
     }
@@ -121,16 +121,18 @@ export function AuthForm() {
     const onSubmit = async (values: z.infer<typeof signUpSchema>) => {
         setLoading('signup');
         try {
-          // On passe les infos au provider via la session storage,
-          // car onAuthStateChanged est le seul point de vérité.
+          // Pass info via sessionStorage for the onAuthStateChanged listener.
           sessionStorage.setItem('signupUsername', values.username);
-          sessionStorage.setItem('signupReferralCode', values.referralCode || '');
+          if (values.referralCode) {
+            sessionStorage.setItem('signupReferralCode', values.referralCode);
+          }
           await createUserWithEmailAndPassword(auth, values.email, values.password);
+          // Redirection and profile creation are handled by the central provider.
           handleAuthSuccess();
         } catch (error: any) {
           handleAuthError(error);
         } finally {
-          // Le nettoyage se fait maintenant dans le provider après lecture
+          // Cleanup is now done in the provider after reading
           setLoading(null);
         }
       };

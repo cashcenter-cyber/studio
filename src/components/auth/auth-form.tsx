@@ -26,6 +26,9 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import { createUserProfile } from '@/lib/firestore'; // Importez la fonction
+import { useFirestore } from '@/firebase'; // Importez useFirestore
+
 
 const signUpSchema = z.object({
   username: z.string().min(3, { message: 'Username must be at least 3 characters.' }),
@@ -44,6 +47,7 @@ export function AuthForm() {
   const router = useRouter();
   const { toast } = useToast();
   const auth = useAuthService();
+  const db = useFirestore();
 
   const handleAuthSuccess = () => {
     router.push('/dashboard');
@@ -54,11 +58,6 @@ export function AuthForm() {
   };
 
   const handleAuthError = (error: any) => {
-    // Avoid showing the "offline" error which is an intermediate state
-    if (error.code === 'unavailable' || (error.message && error.message.includes('offline'))) {
-      console.warn('Ignoring transient offline error during login flow.');
-      return;
-    }
     toast({
       variant: 'destructive',
       title: 'Authentication Error',
@@ -71,6 +70,8 @@ export function AuthForm() {
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
+      // La création du profil sera gérée par le provider central.
+      // On redirige simplement après le succès de la connexion.
       handleAuthSuccess();
     } catch (error: any) {
         handleAuthError(error);
@@ -121,6 +122,8 @@ export function AuthForm() {
     const onSubmit = async (values: z.infer<typeof signUpSchema>) => {
         setLoading('signup');
         try {
+          // On passe les infos au provider via la session storage,
+          // car le onAuthStateChanged est le seul point de vérité.
           sessionStorage.setItem('signupUsername', values.username);
           sessionStorage.setItem('signupReferralCode', values.referralCode || '');
           await createUserWithEmailAndPassword(auth, values.email, values.password);
@@ -128,8 +131,7 @@ export function AuthForm() {
         } catch (error: any) {
           handleAuthError(error);
         } finally {
-          sessionStorage.removeItem('signupUsername');
-          sessionStorage.removeItem('signupReferralCode');
+          // Le nettoyage se fait maintenant dans le provider après lecture
           setLoading(null);
         }
       };

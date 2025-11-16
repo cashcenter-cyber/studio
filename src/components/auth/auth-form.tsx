@@ -26,7 +26,6 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import { createUserProfile } from '@/lib/firestore'; // Importez la fonction
 import { useFirestore } from '@/firebase'; // Importez useFirestore
 
 
@@ -70,7 +69,7 @@ export function AuthForm() {
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
-      // La création du profil sera gérée par le provider central.
+      // La création du profil est maintenant gérée par le provider central.
       // On redirige simplement après le succès de la connexion.
       handleAuthSuccess();
     } catch (error: any) {
@@ -123,7 +122,7 @@ export function AuthForm() {
         setLoading('signup');
         try {
           // On passe les infos au provider via la session storage,
-          // car le onAuthStateChanged est le seul point de vérité.
+          // car onAuthStateChanged est le seul point de vérité.
           sessionStorage.setItem('signupUsername', values.username);
           sessionStorage.setItem('signupReferralCode', values.referralCode || '');
           await createUserWithEmailAndPassword(auth, values.email, values.password);

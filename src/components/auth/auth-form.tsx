@@ -70,8 +70,6 @@ export function AuthForm() {
     setLoading('google');
     const provider = new GoogleAuthProvider();
     try {
-      // The profile creation is now handled centrally by the FirebaseProvider.
-      // We just need to sign in, and the provider will detect the new user and create the profile if needed.
       await signInWithPopup(auth, provider);
       handleAuthSuccess();
     } catch (error: any) {
@@ -123,10 +121,6 @@ export function AuthForm() {
     const onSubmit = async (values: z.infer<typeof signUpSchema>) => {
         setLoading('signup');
         try {
-          // The profile creation is handled by the central provider/listener
-          // We pass the desired username via session storage as a temporary solution
-          // as we cannot pass it directly to createUserWithEmailAndPassword
-          // and the central listener doesn't have access to this form's values.
           sessionStorage.setItem('signupUsername', values.username);
           sessionStorage.setItem('signupReferralCode', values.referralCode || '');
           await createUserWithEmailAndPassword(auth, values.email, values.password);

@@ -20,6 +20,7 @@ try {
     if (!admin.apps.length) {
       admin.initializeApp({
         credential: admin.credential.cert(JSON.parse(cleanedJson)),
+        databaseURL: "https://cash-center-fun-default-rtdb.europe-west1.firebasedatabase.app"
       });
       adminAuth = admin.auth();
       adminDb = admin.firestore();

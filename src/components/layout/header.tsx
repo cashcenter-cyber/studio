@@ -29,6 +29,8 @@ import { signOut } from 'firebase/auth';
 import { useAuthService } from '@/firebase';
 import { ThemeSwitcher } from './theme-switcher';
 import { cn } from '@/lib/utils';
+import { CashIcon } from '../icons/cash-icon';
+import { Skeleton } from '../ui/skeleton';
 
 export function Header() {
   const { user, userProfile, isUserLoading } = useUser();
@@ -99,56 +101,66 @@ export function Header() {
           )}
         </nav>
         <div className="flex items-center justify-end space-x-4">
-            {isUserLoading ? null : user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="relative h-10 w-10 rounded-full"
+            {isUserLoading ? (
+              <Skeleton className="h-10 w-40 rounded-md" />
+            ) : user && userProfile ? (
+              <div className="flex items-center gap-4">
+                <div className="hidden sm:flex items-center gap-2 glass-card px-3 py-2">
+                    <span className="font-bold text-white font-headline">
+                        {userProfile.currentBalance.toLocaleString()}
+                    </span>
+                    <CashIcon className="h-5 w-5" />
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="relative h-10 w-10 rounded-full"
+                    >
+                      <Avatar className="h-10 w-10 border-2 border-primary">
+                        <AvatarImage
+                          src={user.photoURL ?? ''}
+                          alt={userProfile?.username ?? ''}
+                        />
+                        <AvatarFallback className="bg-primary text-primary-foreground">
+                          {userProfile?.username
+                            ?.charAt(0)
+                            .toUpperCase() ??
+                            user.email?.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    className="w-56 glass-card"
+                    align="end"
+                    forceMount
                   >
-                    <Avatar className="h-10 w-10 border-2 border-primary">
-                      <AvatarImage
-                        src={user.photoURL ?? ''}
-                        alt={userProfile?.username ?? ''}
-                      />
-                      <AvatarFallback className="bg-primary text-primary-foreground">
-                        {userProfile?.username
-                          ?.charAt(0)
-                          .toUpperCase() ??
-                          user.email?.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  className="w-56 glass-card"
-                  align="end"
-                  forceMount
-                >
-                  <DropdownMenuLabel className="font-normal">
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">
-                        {userProfile?.username ?? 'User'}
-                      </p>
-                      <p className="text-xs leading-none text-muted-foreground">
-                        {user.email}
-                      </p>
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard">
-                      <LayoutDashboard className="mr-2 h-4 w-4" />
-                      <span>Dashboard</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleSignOut}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Log out</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    <DropdownMenuLabel className="font-normal">
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">
+                          {userProfile?.username ?? 'User'}
+                        </p>
+                        <p className="text-xs leading-none text-muted-foreground">
+                          {user.email}
+                        </p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/dashboard">
+                        <LayoutDashboard className="mr-2 h-4 w-4" />
+                        <span>Dashboard</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleSignOut}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Log out</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             ) : (
                 <div className="flex items-center gap-2">
                     <Button variant="outline" asChild>

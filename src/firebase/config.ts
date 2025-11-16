@@ -2,7 +2,7 @@
 // Security is enforced by Firebase Security Rules on the backend.
 export const firebaseConfig = {
     apiKey: "AIzaSyDH_gKfm1JMSAJd0GlrFWX7-moAckNiOAw",
-    authDomain: "cash-center.fun",
+    authDomain: "cash-center-fun.firebaseapp.com",
     projectId: "cash-center-fun",
     storageBucket: "cash-center-fun.appspot.com",
     messagingSenderId: "31868832103",

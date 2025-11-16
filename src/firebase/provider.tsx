@@ -6,6 +6,7 @@ import { Firestore } from 'firebase/firestore';
 import { Auth } from 'firebase/auth';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 import { UserProvider } from './auth/use-user';
+import { initializeFirebase } from '.';
 
 // Define the shape of the Firebase context
 export interface FirebaseContextState {
@@ -20,9 +21,6 @@ export const FirebaseContext = createContext<FirebaseContextState | undefined>(u
 // Define props for the FirebaseProvider component
 interface FirebaseProviderProps {
   children: ReactNode;
-  firebaseApp: FirebaseApp;
-  auth: Auth;
-  firestore: Firestore;
 }
 
 /**
@@ -31,19 +29,13 @@ interface FirebaseProviderProps {
  */
 export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   children,
-  firebaseApp,
-  firestore,
-  auth,
 }) => {
-  // Memoize the context value to prevent unnecessary re-renders of consumers.
-  const contextValue = useMemo(() => ({
-    firebaseApp,
-    firestore,
-    auth,
-  }), [firebaseApp, firestore, auth]);
+  const firebaseServices = useMemo(() => {
+    return initializeFirebase();
+  }, []);
 
   return (
-    <FirebaseContext.Provider value={contextValue}>
+    <FirebaseContext.Provider value={firebaseServices}>
       <UserProvider>
         <FirebaseErrorListener />
         {children}

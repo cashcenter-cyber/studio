@@ -7,5 +7,6 @@ export const firebaseConfig = {
     storageBucket: "cash-center-fun.appspot.com",
     messagingSenderId: "31868832103",
     appId: "1:31868832103:web:96452a8b309a65c2b0b14a",
-    measurementId: "G-9XG991J5P9"
+    measurementId: "G-9XG991J5P9",
+    databaseURL: "https://cash-center-fun-default-rtdb.europe-west1.firebasedatabase.app"
 };

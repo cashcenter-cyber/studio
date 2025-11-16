@@ -69,20 +69,9 @@ export function AuthForm() {
     setLoading(true);
     const provider = new GoogleAuthProvider();
     try {
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-
-      // This is the critical part. We check if the user document exists.
-      // If Firestore is slow to connect, getDoc might fail here.
-      // A robust solution is to let the backend handle profile creation via a function
-      // or to rely on a listener on the main app page, but for now, we try this.
-      const userDocRef = doc(db, 'users', user.uid);
-      const userDoc = await getDoc(userDocRef);
-
-      if (!userDoc.exists()) {
-        await createUserProfile(db, user);
-      }
-      
+      // The createUserProfile logic is now handled by the useUser hook.
+      // We just need to sign in and redirect.
+      await signInWithPopup(auth, provider);
       handleAuthSuccess();
     } catch (error: any) {
         handleAuthError(error);

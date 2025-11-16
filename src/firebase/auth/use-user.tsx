@@ -4,9 +4,10 @@ import React, { useState, useEffect, useContext, createContext } from 'react';
 import type { Auth, User } from 'firebase/auth';
 import { onAuthStateChanged } from 'firebase/auth';
 import type { Firestore } from 'firebase/firestore';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { doc, onSnapshot, getDoc } from 'firebase/firestore';
 import type { UserProfile } from '@/lib/types';
 import { FirebaseContext } from '@/firebase/provider';
+import { createUserProfile } from '@/lib/firestore';
 
 export interface UserState {
   user: User | null;
@@ -40,7 +41,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const authUnsubscribe = onAuthStateChanged(
       auth,
-      (firebaseUser: User | null) => {
+      async (firebaseUser: User | null) => {
         // First, clear any previous profile listener
         if (profileUnsubscribe) {
           profileUnsubscribe();
@@ -48,10 +49,26 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
         setUser(firebaseUser);
         setUserProfile(null);
+        setIsLoading(true);
 
         if (firebaseUser) {
-          setIsLoading(true);
           const profileRef = doc(firestore, 'users', firebaseUser.uid);
+          
+          // Check if the user profile exists. If not, create it.
+          // This is especially for social sign-ins (like Google) where the profile might not exist yet.
+          const docSnap = await getDoc(profileRef);
+          if (!docSnap.exists()) {
+            try {
+              await createUserProfile(firestore, firebaseUser);
+            } catch (createError) {
+              console.error("Failed to create user profile:", createError);
+              setError(createError as Error);
+              setIsLoading(false);
+              return; // Stop further execution if profile creation fails
+            }
+          }
+          
+          // Now, listen for real-time updates to the profile.
           profileUnsubscribe = onSnapshot(
             profileRef,
             (docSnap) => {
@@ -59,7 +76,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 setUserProfile(docSnap.data() as UserProfile);
               } else {
                 setUserProfile(null);
-                // This could happen if profile creation fails, not necessarily an error state
               }
               setIsLoading(false); // Loading is done once we get a profile snapshot
             },

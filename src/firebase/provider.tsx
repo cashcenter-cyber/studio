@@ -7,28 +7,27 @@ import { Auth } from 'firebase/auth';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 import { UserProvider } from './auth/use-user';
 
-// Just the services here
+// Define the shape of the Firebase context
 export interface FirebaseContextState {
-  areServicesAvailable: boolean;
-  firebaseApp: FirebaseApp | null;
-  firestore: Firestore | null;
-  auth: Auth | null;
+  firebaseApp: FirebaseApp;
+  firestore: Firestore;
+  auth: Auth;
 }
 
-// React Context
+// Create the React Context
 export const FirebaseContext = createContext<FirebaseContextState | undefined>(undefined);
 
-// Props for FirebaseProvider
+// Define props for the FirebaseProvider component
 interface FirebaseProviderProps {
   children: ReactNode;
-  firebaseApp: FirebaseApp | null;
-  auth: Auth | null;
-  firestore: Firestore | null;
+  firebaseApp: FirebaseApp;
+  auth: Auth;
+  firestore: Firestore;
 }
 
 /**
  * FirebaseProvider manages and provides Firebase services.
- * It now wraps children with the UserProvider.
+ * It ensures that the context value is memoized and stable.
  */
 export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   children,
@@ -36,16 +35,12 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   firestore,
   auth,
 }) => {
-  // Memoize the context value
-  const contextValue = useMemo((): FirebaseContextState => {
-    const servicesAvailable = !!(firebaseApp && firestore && auth);
-    return {
-      areServicesAvailable: servicesAvailable,
-      firebaseApp: servicesAvailable ? firebaseApp : null,
-      firestore: servicesAvailable ? firestore : null,
-      auth: servicesAvailable ? auth : null,
-    };
-  }, [firebaseApp, firestore, auth]);
+  // Memoize the context value to prevent unnecessary re-renders of consumers.
+  const contextValue = useMemo(() => ({
+    firebaseApp,
+    firestore,
+    auth,
+  }), [firebaseApp, firestore, auth]);
 
   return (
     <FirebaseContext.Provider value={contextValue}>
@@ -59,25 +54,15 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
 
 
 /**
- * Hook to access core Firebase services.
- * Throws error if core services are not available or used outside provider.
+ * Custom hook to access the core Firebase services from the context.
+ * Throws an error if used outside of a FirebaseProvider.
  */
-export const useFirebase = (): { firebaseApp: FirebaseApp, firestore: Firestore, auth: Auth } => {
+export const useFirebase = (): FirebaseContextState => {
   const context = useContext(FirebaseContext);
-
   if (context === undefined) {
     throw new Error('useFirebase must be used within a FirebaseProvider.');
   }
-
-  if (!context.areServicesAvailable || !context.firebaseApp || !context.firestore || !context.auth) {
-    throw new Error('Firebase core services not available. Check FirebaseProvider props.');
-  }
-
-  return {
-    firebaseApp: context.firebaseApp,
-    firestore: context.firestore,
-    auth: context.auth,
-  };
+  return context;
 };
 
 /** Hook to access Firebase Auth instance. */

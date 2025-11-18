@@ -50,7 +50,7 @@ export async function POST(request: Request) {
     };
     await addDoc(transactionsRef, newTransaction);
     
-    // --- 2. Handle Referral Commission ---
+    // --- 2. Handle Referral Commission (ACTIVE) ---
     if (userProfile.referredBy) {
         const referrerId = userProfile.referredBy;
         const commissionAmount = Math.round(amount * 0.02); // 2% commission

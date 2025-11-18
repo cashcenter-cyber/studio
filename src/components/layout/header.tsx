@@ -43,10 +43,10 @@ export function Header() {
   const loggedInNavItems = [
     { href: '/dashboard/offers', label: 'Offers', icon: Wallet },
     { href: '/dashboard/rewards', label: 'Rewards', icon: Gift },
-    { href: '/dashboard/leaderboards', label: 'Leaderboards', icon: Trophy },
   ];
 
   const commonNavItems = [
+    { href: '/dashboard/leaderboards', label: 'Leaderboards', icon: Trophy },
     {
       href: '#',
       label: 'FAQ',

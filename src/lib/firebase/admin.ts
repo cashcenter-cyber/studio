@@ -1,4 +1,6 @@
 
+'use server';
+
 import admin from 'firebase-admin';
 import type { DecodedIdToken } from 'firebase-admin/auth';
 
@@ -40,6 +42,7 @@ export { adminAuth, adminDb };
 export const verifyIdToken = async (token: string): Promise<DecodedIdToken | null> => {
   if (!adminAuth) return null;
   try {
+    // The verifyIdToken method automatically handles token expiration.
     const decodedToken = await adminAuth.verifyIdToken(token);
     return decodedToken;
   } catch (error) {

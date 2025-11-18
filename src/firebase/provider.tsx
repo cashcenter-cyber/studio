@@ -2,12 +2,12 @@
 
 import React, { createContext, useContext, ReactNode, useState, useEffect, useMemo, type DependencyList } from 'react';
 import { FirebaseApp } from 'firebase/app';
-import { Firestore, doc, onSnapshot, getDoc } from 'firebase/firestore';
+import { Firestore, doc, onSnapshot } from 'firebase/firestore';
 import { Auth, User, onAuthStateChanged } from 'firebase/auth';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 import { FirestorePermissionError, errorEmitter } from '.';
 import type { UserProfile } from '@/lib/types';
-import { createUserProfile } from '@/lib/firestore';
+import { ensureUserProfile } from '@/lib/firestore';
 
 // --- CONTEXT DEFINITIONS ---
 
@@ -57,24 +57,22 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children, fi
       }
 
       if (firebaseUser) {
-        const profileRef = doc(firestore, 'users', firebaseUser.uid);
-
-        // Set loading state for user and profile
+        // Set loading state immediately upon finding a firebase user
         setUserState(prev => ({ ...prev, user: firebaseUser, isLoading: true, isUserLoading: true }));
 
         try {
-            const docSnap = await getDoc(profileRef);
-            if (!docSnap.exists()) {
-              const signupUsername = sessionStorage.getItem('signupUsername');
-              const signupReferralCode = sessionStorage.getItem('signupReferralCode');
-              await createUserProfile(firestore, firebaseUser, { 
+            // This function now handles both creation and updates for old users
+            const signupUsername = sessionStorage.getItem('signupUsername');
+            const signupReferralCode = sessionStorage.getItem('signupReferralCode');
+            await ensureUserProfile(firestore, firebaseUser, {
                 username: signupUsername,
-                referralCode: signupReferralCode
-              });
-              sessionStorage.removeItem('signupUsername');
-              sessionStorage.removeItem('signupReferralCode');
-            }
+                referralCode: signupReferralCode,
+            });
+            sessionStorage.removeItem('signupUsername');
+            sessionStorage.removeItem('signupReferralCode');
 
+            // Now that we're sure a profile exists (or was just created), listen for it.
+            const profileRef = doc(firestore, 'users', firebaseUser.uid);
             profileUnsubscribe = onSnapshot(profileRef, (doc) => {
                 setUserState(prev => ({
                 ...prev,
@@ -94,7 +92,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children, fi
             });
 
         } catch (error: any) {
-             console.error("Error creating/fetching user profile:", error);
+             console.error("Error ensuring user profile:", error);
              setUserState(prev => ({ ...prev, isLoading: false, isUserLoading: false, error }));
         }
 

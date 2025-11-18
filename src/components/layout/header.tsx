@@ -5,14 +5,11 @@ import Image from 'next/image';
 import {
   LogOut,
   LayoutDashboard,
-  LogIn,
-  ChevronDown,
   HelpCircle,
   Users,
   Wallet,
   Gift,
   Trophy,
-  MessageSquare,
 } from 'lucide-react';
 import { useUser } from '@/firebase';
 import { Button } from '@/components/ui/button';
@@ -28,12 +25,11 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { signOut } from 'firebase/auth';
 import { useAuthService } from '@/firebase';
 import { ThemeSwitcher } from './theme-switcher';
-import { cn } from '@/lib/utils';
 import { CashIcon } from '../icons/cash-icon';
 import { Skeleton } from '../ui/skeleton';
 
 export function Header() {
-  const { user, userProfile, isUserLoading } = useUser();
+  const { user, userProfile, isLoading: isUserLoading } = useUser();
   const auth = useAuthService();
 
   const handleSignOut = async () => {

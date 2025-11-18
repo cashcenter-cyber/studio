@@ -12,21 +12,17 @@ try {
     console.warn("FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 is not set. Firebase Admin SDK will not be initialized on the server.");
   } else {
     const serviceAccountJson = Buffer.from(serviceAccountKeyBase64, 'base64').toString('utf-8');
-    const cleanedJson = serviceAccountJson.replace(/[\x00-\x1F\x7F-\x9F]/g, "").trim();
+    const serviceAccount = JSON.parse(serviceAccountJson);
 
-    const appName = 'firebase-admin-app';
-    // Éviter la réinitialisation si l'application existe déjà
-    const existingApp = admin.apps.find(app => app?.name === appName);
-
-    if (!existingApp) {
+    if (admin.apps.length === 0) {
       admin.initializeApp({
-        credential: admin.credential.cert(JSON.parse(cleanedJson)),
+        credential: admin.credential.cert(serviceAccount),
         databaseURL: "https://cash-center-fun-default-rtdb.europe-west1.firebasedatabase.app"
-      }, appName);
+      });
     }
     
-    adminAuth = admin.app(appName).auth();
-    adminDb = admin.app(appName).firestore();
+    adminAuth = admin.auth();
+    adminDb = admin.firestore();
   }
 } catch (error: any) {
   console.error('Firebase admin initialization error:', error.message);

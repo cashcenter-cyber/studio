@@ -7,7 +7,7 @@ import { Auth, User, onAuthStateChanged } from 'firebase/auth';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 import { FirestorePermissionError, errorEmitter } from '.';
 import type { UserProfile } from '@/lib/types';
-import { ensureUserProfile } from '@/lib/firestore';
+import { ensureUserProfileExistsAction } from '@/lib/actions';
 
 // --- CONTEXT DEFINITIONS ---
 
@@ -61,15 +61,24 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children, fi
         setUserState(prev => ({ ...prev, user: firebaseUser, isLoading: true, isUserLoading: true }));
 
         try {
-            // This function now handles both creation and updates for old users
+            // Get signup data from session storage
             const signupUsername = sessionStorage.getItem('signupUsername');
             const signupReferralCode = sessionStorage.getItem('signupReferralCode');
-            await ensureUserProfile(firestore, firebaseUser, {
+            
+            // Get token and call server action to ensure profile exists
+            const token = await firebaseUser.getIdToken();
+            const result = await ensureUserProfileExistsAction(token, {
                 username: signupUsername,
                 referralCode: signupReferralCode,
             });
+
+            // Clean up session storage regardless of result
             sessionStorage.removeItem('signupUsername');
             sessionStorage.removeItem('signupReferralCode');
+
+            if (!result.success) {
+                throw new Error(result.error || "Failed to ensure user profile on server.");
+            }
 
             // Now that we're sure a profile exists (or was just created), listen for it.
             const profileRef = doc(firestore, 'users', firebaseUser.uid);

@@ -3,7 +3,7 @@
 
 import { z } from 'zod'
 import { adminDb, verifyIdToken } from './firebase/admin'
-import { collection, doc, updateDoc, getDoc, serverTimestamp, addDoc, deleteDoc } from 'firebase/firestore'
+import { collection, doc, updateDoc, getDoc, serverTimestamp, addDoc, deleteDoc, query, where, getDocs, limit } from 'firebase/firestore'
 import type { Payout, UserProfile, Offer } from './types'
 import { revalidatePath } from 'next/cache'
 import { createHash } from 'crypto'
@@ -13,6 +13,82 @@ const payoutSchema = z.object({
   method: z.string(),
   payoutAddress: z.string().min(1),
 })
+
+const generateReferralCode = (length: number = 8): string => {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return result;
+};
+
+
+export async function ensureUserProfileExistsAction(token: string, signupData: { username: string | null, referralCode: string | null }) {
+    if (!token) {
+        return { success: false, error: 'Authentication token is missing.' };
+    }
+    const decodedToken = await verifyIdToken(token);
+    if (!decodedToken) {
+        return { success: false, error: 'Invalid authentication token.' };
+    }
+    
+    if (!adminDb) {
+      return { success: false, error: 'Database service not available.' };
+    }
+
+    const userRef = doc(adminDb, 'users', decodedToken.uid);
+
+    try {
+        const docSnap = await getDoc(userRef);
+
+        if (!docSnap.exists()) {
+            // --- Create New User Profile ---
+            let referredBy: string | null = null;
+            if (signupData.referralCode) {
+                const usersRef = collection(adminDb, 'users');
+                const q = query(usersRef, where('referralCode', '==', signupData.referralCode.toUpperCase()), limit(1));
+                const querySnapshot = await getDocs(q);
+                if (!querySnapshot.empty) {
+                    referredBy = querySnapshot.docs[0].id;
+                }
+            }
+            
+            const newUserProfile: Omit<UserProfile, 'joinDate'> & { joinDate: any } = {
+                uid: decodedToken.uid,
+                email: decodedToken.email || null,
+                username: signupData.username || decodedToken.name || decodedToken.email?.split('@')[0] || `user_${decodedToken.uid.substring(0, 6)}`,
+                currentBalance: 0,
+                lifetimeEarnings: 0,
+                role: 'user',
+                joinDate: serverTimestamp(),
+                status: 'active',
+                referralCode: generateReferralCode(),
+                referredBy: referredBy,
+                referralOf: signupData.referralCode || null,
+                referralEarnings: 0,
+            };
+            
+            await setDoc(userRef, newUserProfile);
+            revalidatePath(`/dashboard`);
+            return { success: true, created: true };
+        } else {
+             // --- User Exists, Check for Missing Fields (like referralCode) ---
+            const userProfile = docSnap.data() as UserProfile;
+            if (!userProfile.referralCode) {
+                await updateDoc(userRef, {
+                    referralCode: generateReferralCode()
+                });
+                revalidatePath(`/dashboard`);
+            }
+            return { success: true, created: false };
+        }
+    } catch (error: any) {
+        console.error("Error in ensureUserProfileExistsAction:", error);
+        return { success: false, error: error.message || "An unknown error occurred." };
+    }
+}
+
 
 export async function requestPayout(values: z.infer<typeof payoutSchema>, token: string) {
     if (!token) {

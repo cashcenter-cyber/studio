@@ -1,3 +1,4 @@
+
 import { NextResponse } from 'next/server';
 import { adminDb, adminAuth, verifyIdToken, isAdmin } from '@/lib/firebase/admin';
 import { doc, updateDoc, getDocs, collection, query, where, writeBatch } from 'firebase/firestore';
@@ -15,7 +16,7 @@ export async function POST(request: Request) {
   const token = authHeader.split('Bearer ')[1];
   const decodedToken = await verifyIdToken(token);
 
-  if (!decodedToken || !isAdmin(decodedToken)) {
+  if (!decodedToken || !(await isAdmin(decodedToken))) {
     return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });
   }
 

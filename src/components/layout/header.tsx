@@ -29,7 +29,7 @@ import { CashIcon } from '../icons/cash-icon';
 import { Skeleton } from '../ui/skeleton';
 
 export function Header() {
-  const { user, userProfile, isLoading: isUserLoading } = useUser();
+  const { user, userProfile, isUserLoading } = useUser();
   const auth = useAuthService();
 
   const handleSignOut = async () => {
@@ -74,7 +74,7 @@ export function Header() {
           <ThemeSwitcher />
         </div>
         <nav className="hidden md:flex flex-1 items-center justify-center space-x-6 text-sm font-medium text-gray-300">
-           {user && loggedInNavItems.map((item) => (
+           {user && !isUserLoading && loggedInNavItems.map((item) => (
              <Link
                 key={item.label}
                 href={item.href}

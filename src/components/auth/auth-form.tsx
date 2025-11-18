@@ -58,9 +58,7 @@ export function AuthForm() {
     toast({
       variant: 'destructive',
       title: 'Authentication Error',
-      description: error.code === 'auth/unauthorized-domain' 
-        ? 'This domain is not authorized for authentication. Please contact support.'
-        : error.message || 'An unknown error occurred.',
+      description: error.message || 'An unknown error occurred.',
     });
   };
 

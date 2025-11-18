@@ -1,11 +1,11 @@
 'use client';
 
-import React, { DependencyList, createContext, useContext, ReactNode, useMemo, useState, useEffect } from 'react';
+import React, { createContext, useContext, ReactNode, useState, useEffect, useMemo, type DependencyList } from 'react';
 import { FirebaseApp } from 'firebase/app';
 import { Firestore, doc, onSnapshot, getDoc } from 'firebase/firestore';
 import { Auth, User, onAuthStateChanged } from 'firebase/auth';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
-import { initializeFirebase, FirestorePermissionError, errorEmitter } from '.';
+import { FirestorePermissionError, errorEmitter } from '.';
 import type { UserProfile } from '@/lib/types';
 import { createUserProfile } from '@/lib/firestore';
 
@@ -33,12 +33,12 @@ const UserContext = createContext<UserState | undefined>(undefined);
 
 interface FirebaseProviderProps {
   children: ReactNode;
+  firebaseApp: FirebaseApp;
+  firestore: Firestore;
+  auth: Auth;
 }
 
-export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) => {
-  // Memoize Firebase services initialization to prevent re-renders
-  const firebaseServices = useMemo(() => initializeFirebase(), []);
-  
+export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children, firebaseApp, firestore, auth }) => {
   const [userState, setUserState] = useState<UserState>({
     user: null,
     userProfile: null,
@@ -48,8 +48,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
   });
 
   useEffect(() => {
-    const { auth, firestore } = firebaseServices;
-    
     let profileUnsubscribe: (() => void) | undefined;
 
     const authUnsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -65,10 +63,8 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
         setUserState(prev => ({ ...prev, user: firebaseUser, isLoading: true, isUserLoading: true }));
 
         try {
-            // Check if profile exists, if not, create it.
             const docSnap = await getDoc(profileRef);
             if (!docSnap.exists()) {
-              // For email signup, we temporarily store username in session storage.
               const signupUsername = sessionStorage.getItem('signupUsername');
               const signupReferralCode = sessionStorage.getItem('signupReferralCode');
               await createUserProfile(firestore, firebaseUser, { 
@@ -79,7 +75,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
               sessionStorage.removeItem('signupReferralCode');
             }
 
-            // Now, attach a real-time listener for the profile.
             profileUnsubscribe = onSnapshot(profileRef, (doc) => {
                 setUserState(prev => ({
                 ...prev,
@@ -115,7 +110,9 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
         profileUnsubscribe();
       }
     };
-  }, [firebaseServices]);
+  }, [auth, firestore]);
+
+  const firebaseServices = useMemo(() => ({ firebaseApp, firestore, auth }), [firebaseApp, firestore, auth]);
 
   return (
     <FirebaseContext.Provider value={firebaseServices}>
@@ -130,10 +127,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
 
 // --- HOOKS ---
 
-/**
- * Custom hook to access the core Firebase services from the context.
- * Throws an error if used outside of a FirebaseProvider.
- */
 export const useFirebase = (): FirebaseContextState => {
   const context = useContext(FirebaseContext);
   if (context === undefined) {
@@ -142,28 +135,21 @@ export const useFirebase = (): FirebaseContextState => {
   return context;
 };
 
-/** Hook to access Firebase Auth instance. */
 export const useAuthService = (): Auth => {
   const { auth } = useFirebase();
   return auth;
 };
 
-/** Hook to access Firestore instance. */
 export const useFirestore = (): Firestore => {
   const { firestore } = useFirebase();
   return firestore;
 };
 
-/** Hook to access Firebase App instance. */
 export const useFirebaseApp = (): FirebaseApp => {
   const { firebaseApp } = useFirebase();
   return firebaseApp;
 };
 
-/**
- * Custom hook to access the user's auth and profile state.
- * Throws an error if used outside of a UserProvider (which is inside FirebaseProvider).
- */
 export const useUser = (): UserState => {
   const context = useContext(UserContext);
   if (context === undefined) {
@@ -171,7 +157,6 @@ export const useUser = (): UserState => {
   }
   return context;
 };
-
 
 type MemoFirebase <T> = T & {__memo?: boolean};
 

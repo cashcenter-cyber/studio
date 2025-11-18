@@ -5,7 +5,7 @@ import { Toaster } from '@/components/ui/toaster';
 import './globals.css';
 import { ThemeProvider } from '@/context/theme-provider';
 import AnimatedBackground from '@/components/layout/animated-background';
-import { FirebaseProvider } from '@/firebase/provider';
+import { FirebaseClientProvider } from '@/firebase/client-provider';
 
 const fontBody = Inter({
   subsets: ['latin'],
@@ -42,13 +42,13 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
         >
-          <FirebaseProvider>
+          <FirebaseClientProvider>
               <AnimatedBackground />
               <div className="relative z-10">
                 {children}
               </div>
               <Toaster />
-          </FirebaseProvider>
+          </FirebaseClientProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -48,11 +48,6 @@ export function Header() {
       label: 'FAQ',
       icon: HelpCircle,
     },
-    {
-      href: '#',
-      label: 'Affiliate',
-      icon: Users,
-    },
   ];
 
   return (
